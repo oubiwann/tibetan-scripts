@@ -174,6 +174,13 @@ class PhysicalPage(object):
         Created the pecha pages needed for this physical page.
         """
         for blockNum in xrange(1, self.blockCount + 1):
+            # "startCount" is the varaible used to caculate the current pecha
+            # page. The current physical page number times the number of
+            # blocks per physical page will give us the highest block number
+            # for the current page -- not what we want: if we're on block 13,
+            # that would give us 16. For 13-16, we want to start with the
+            # total block count for the previous physical page, in this
+            # example, 12.
             startCount = (self.number - 1) * self.blockCount
             if startCount + blockNum > self.document.pageCount:
                 break
