@@ -134,7 +134,8 @@ class Pecha(object):
 # pecha object will need to be updated to have the ability to create different
 # physical page instances, depending upon parameters passed to the constructor.
 
-# XXX move into pecha.layouts.booklet
+# XXX move into pecha.layouts.booklet; will need to import orientation and side
+# constants
 class PhysicalPage(object):
     """
     An object representing a two-sided, pysical piece of paper.
@@ -152,6 +153,12 @@ class PhysicalPage(object):
     >>> pp = PhysicalPage(p, 1)
     >>> len(pp.blocks) == 4
     True
+    >>> for block in pp.blocks:
+    ...   print block
+    <PechaPage: block 1 | page 1 | back side | upside-down>
+    <PechaPage: block 2 | page 1 | front side | rightside-up>
+    <PechaPage: block 3 | page 1 | front side | rightside-up>
+    <PechaPage: block 4 | page 1 | back side | upside-down>
 
     >>> p = Pecha(6)
     >>> pp = PhysicalPage(p, 2)
@@ -160,6 +167,11 @@ class PhysicalPage(object):
     # total of 6 blocks (but we're just checking the second page)
     >>> len(pp.blocks) == 2
     True
+    >>> for block in pp.blocks:
+    ...   print block
+    <PechaPage: block 5 | page 2 | front side | rightside-up>
+    <PechaPage: block 6 | page 2 | back side | upside-down>
+
     """
     def __init__(self, document, number=1, blocks=4):
         self.document = document
@@ -182,14 +194,24 @@ class PhysicalPage(object):
             # total block count for the previous physical page, in this
             # example, 12.
             startCount = (self.number - 1) * self.blockCount
-            if startCount + blockNum > self.document.pageCount:
+            currentPage = startCount + blockNum
+            if currentPage > self.document.pageCount:
                 break
+            if currentPage <= self.document.pageCount / 2.0:
+                firstHalf = True
+            else:
+                firstHalf = False
+            secondHalf = not firstHalf
             #print blockNum, startCount + blockNum, self.number, self.document.pageCount
-            # determine oritentation of block on paper
-            orientation = 0
-            # determine side of paper block will be on
-            side = 0
-            p = PechaPage(self, orientation, side)
+            # determine oritentation and side of paper for block
+            if ((firstHalf and (currentPage % 2) == 1) or
+                (secondHalf and (currentPage % 2) == 0)):
+                orientation = UPSIDEDOWN
+                side = BACK
+            else:
+                orientation = RIGHTSIDEUP
+                side = FRONT
+            p = PechaPage(self, orientation, side, currentPage)
             self.blocks.append(p)
 
 # XXX move into pecha.base
@@ -221,8 +243,33 @@ class PechaPage(object):
         self.side = side
         self.number = number
 
+    def __repr__(self):
+        if self.side == FRONT:
+            side = 'front'
+        else:
+            side = 'back'
+        if self.orientation == RIGHTSIDEUP:
+            orient = 'rightside-up'
+        else:
+            orient = 'upside-down'
+        return "<%s: block %s | page %s | %s side | %s>" % (
+            self.__class__.__name__, self.number, self.paper.number, side, orient)
+
     def setOrientation(self, const):
-        pass
+        self._orient = const
+
+    def getOrientation(self):
+        return self._orient
+    orientation = property(getOrientation, setOrientation)
+
+    def setSide(self, const):
+        self._side = const
+
+    def getSide(self):
+        return self._side
+    side = property(getSide, setSide)
+
+
 
 def test():
     import doctest
