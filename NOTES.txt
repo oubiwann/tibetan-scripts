@@ -1,0 +1,88 @@
++------+
+| 1    |
+|      |
+|      |
++------+
+
+
+page 1: top of 1st page, 2nd side, upside-down
+page 2: top of 1st page, 1st side, right-side up
+page 3: bottom 1st page, 1st side, right-side up
+page 4: bottom 1st page, 2nd side, upside-down
+
++------+
+| 1 +------+
+|   | 2    |
+|   |      |
++---|      |
+    +------+
+
+page 1: top of 1st page, 2nd side, upside-down
+page 2: top of 1st page, 1st side, right-side up
+page 3: top of 2nd page, 2nd side, upside-down
+page 4: top of 2nd page, 1st side, right-side up
+page 5: bottom of 2nd page, 1st side, right-side up
+page 6: bottom of 2nd page, 2nd side, upside-down
+page 7: bottom of 1st page, 1st side, right-side up
+page 8: bottom of 1st page, 2nd side, upside-down
+
++------+
+| 1 +------+
+|   | 2 +------+
+|   |   | 3    |
++---|   |      |
+    +---|      |
+        +------+
+
+page 1: top of 1st page, 2nd side, upside-down
+page 2: top of 1st page, 1st side, right-side up
+page 3: top of 2nd page, 2nd side, upside-down
+page 4: top of 2nd page, 1st side, right-side up
+
+
+Mapping Logic:
+
+Total Pecha Pages (tpp)
+Total Actual Pages (tap): c, r = divmod(tpp, 4); c if r == 0 else c + 1
+Orientation: if current page <= (tpp / 2) start with upside and 2nd side, else start with right-side and 1st side
+
+startingSide
+orientation
+pechaPage
+actualPage
+
+totalPechaPages = 14
+div, mod = divmod(totalPechaPages, 4)
+if mod == 0:
+  totalActualPages = div
+else:
+  totalActualPages = div + 1
+
+for currentPage in xrange(1, totalPechaPages + 1):
+  if currentPage <= totalPechaPages / 2.0:
+    firstHalf = True
+  else:
+    firstHalf = False
+  secondHalf = not firstHalf
+  if firstHalf:
+    currentActualPage = int(currentPage / 2.0 + 0.5)
+  else:
+    currentActualPage = totalPechaPages - int(currentPage / 2.0 + 0.5) - 3
+  if ((firstHalf and (currentPage % 2) == 1) or (secondHalf and (currentPage % 2) == 0)):
+    orientation = 'upsidedown'
+    side = '2nd'
+  else:
+    orientation = 'rightsideup'
+    side = '1st'
+  print currentPage, currentActualPage, side, orientation, firstHalf, secondHalf
+
+page 1: top of 1st page, 2nd side, upside-down
+page 2: top of 1st page, 1st side, right-side up
+page 3: top of 2nd page, 2nd side, upside-down
+page 4: top of 2nd page, 1st side, right-side up
+page 5: bottom of 2nd page, 1st side, right-side up
+page 6: bottom of 2nd page, 2nd side, upside-down
+page 7: bottom of 1st page, 1st side, right-side up
+page 8: bottom of 1st page, 2nd side, upside-down
+
+
