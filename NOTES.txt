@@ -164,7 +164,85 @@ for SIDE in xrange(2):
 
 
 
-page 1: top of 1st page, 2nd side, upside-down
-page 2: top of 1st page, 1st side, right-side up
-page 3: bottom 1st page, 1st side, right-side up
-page 4: bottom 1st page, 2nd side, upside-down
+1 Sheet (between 1 and 4 blocks)
++------+
+| 1    |
+|......|
+|      |
++------+
+
+sheet 1 | front | top | block 2 | rightside-up          2
+sheet 1 | front | bottom | block 3 | rightside-up       3
+sheet 1 | back | top | block 1 | upside-down            1
+sheet 1 | back | bottom | block 4 | upside-down         4
+
+
+
+2 Sheets (between 5 and 8 blocks)
++------+
+| 1 +------+
+|...| 2    |
+|   |......|
++---|      |
+    +------+
+
+sheet 1 | front | top | block 2 | rightside-up          2
+sheet 1 | front | bottom | block 7 | rightside-up       7
+sheet 1 | back | top | block 1 | upside-down            1
+sheet 1 | back | bottom | block 8 | upside-down         8
+sheet 2 | front | top | block 4 | rightside-up          4
+sheet 2 | front | bottom | block block 5 | rightside-up 5
+sheet 2 | back | top | block 3 | upside-down            3
+sheet 2 | back | bottom | block 6 | upside-down         6
+
+
+3 Sheets (between 9 and 12 blocks)
++------+
+| 1 +------+
+|...| 2 +------+
+|   |...| 3    |
++---|   |......|
+    +---|      |
+        +------+
+
+sheet 1 | front | top | block 2 | rightside-up          2
+sheet 1 | front | bottom | block 11 | rightside-up      11
+sheet 1 | back | top | block 1 | upside-down            1
+sheet 1 | back | bottom | block 12 | upside-down        12
+sheet 2 | front | top | block 4 | rightside-up          4
+sheet 2 | front | bottom | block block 9 | rightside-up 9
+sheet 2 | back | top | block 3 | upside-down            3
+sheet 2 | back | bottom | block 10 | upside-down        10
+sheet 3 | front | top | block 6 | rightside-up          6
+sheet 3 | front | bottom | block 7 | rightside-up       7
+sheet 3 | back | top | block 5 | upside-down            5
+sheet 3 | back | bottom | block 8 | upside-down         8
+
+
+4 Sheets (between 13 and 16 blocks)
++------+
+| 1 +------+
+|...| 2 +------+
+|   |...| 3 +------+
++---|   |...| 4    |
+    +---|   |......|
+        +---|      |
+            +------+
+
+sheet 1 | front | top | block 2 | rightside-up          2
+sheet 1 | front | bottom | block 15 | rightside-up      15
+sheet 1 | back | top | block 1 | upside-down            1
+sheet 1 | back | bottom | block 16 | upside-down        16
+sheet 2 | front | top | block 4 | rightside-up          4
+sheet 2 | front | bottom | block block 9 | rightside-up 13
+sheet 2 | back | top | block 3 | upside-down            3
+sheet 2 | back | bottom | block 14 | upside-down        14
+sheet 3 | front | top | block 6 | rightside-up          6
+sheet 3 | front | bottom | block 11 | rightside-up      11
+sheet 3 | back | top | block 5 | upside-down            5
+sheet 3 | back | bottom | block 12 | upside-down        12
+sheet 4 | front | top | block 8 | rightside-up          8
+sheet 4 | front | bottom | block 9 | rightside-up       9
+sheet 4 | back | top | block 7 | upside-down            7
+sheet 4 | back | bottom | block 10 | upside-down        10
+

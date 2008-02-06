@@ -312,8 +312,9 @@ class Sheet(object):
             orientation = side
             sideModifier = abs(side - 1)
             for location in xrange(2):
-                signModifier = ((location * -2) + 1)
-                minMaxModifier = ((location * 7) + 1)
+                maxBlocks = int((self.document.blockCount/float(self.blocksPerSheet) * self.blocksPerSheet))
+                signModifier = ((location * - 2) + 1)
+                minMaxModifier = ((location * (maxBlocks - 1)) + 1)
                 relativeBlockNum = (
                     minMaxModifier + 2 * signModifier * (self.number - 1)
                     + sideModifier * signModifier)
@@ -325,7 +326,8 @@ class Sheet(object):
         # now for some cleanup - we may need to trim the blocks
         remainder = self.number * self.blocksPerSheet - self.document.blockCount
         #print self.document.blockCount, self.number, self.number * self.blocksPerSheet, remainder
-        if remainder > 0:
+        #if remainder > 0:
+        if False:
             # since we have a remainder, we know this is the last sheet (and
             # thus last set of blocks) in the pecha; what we now want to do is
             # remove all blocks higher than the index implied by the remainder,

@@ -5,6 +5,7 @@
 * Removed commented out method code.
 * Removed old comment.
 * Renamed module to 'base'.
+* Fixed bug in Sheet.setupBlocks.
 
 2008.02.05
 
