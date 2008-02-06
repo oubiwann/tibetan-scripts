@@ -85,4 +85,86 @@ page 6: bottom of 2nd page, 2nd side, upside-down
 page 7: bottom of 1st page, 1st side, right-side up
 page 8: bottom of 1st page, 2nd side, upside-down
 
+sheet 1 | front | top | block 2 | rightside-up
+sheet 1 | front | bottom | block 7 | rightside-up
+sheet 1 | back | top | block 1 | upside-down
+sheet 1 | back | bottom | block 8 | upside-down
+sheet 2 | front | top | block 4 | rightside-up
+sheet 2 | front | bottom | block block 5 | rightside-up
+sheet 2 | back | top | block 3 | upside-down
+sheet 2 | back | bottom | block 6 | upside-down
 
+2   inner a + 1         front
+7   inner n - 1         front
+1   outer a             back
+8   outer n             back
+4   inner (a+2) + 1     front
+5   inner (n-2) - 1     front
+3   outer (a+2)         back
+6   outer (n-2)         back
+
+(MIN + 2 * (SHEET - 1)) + 1
+(MAX - 2 * (SHEET - 1)) - 1
+(MIN + 2 * (SHEET - 1))
+(MAX - 2 * (SHEET - 1))
+
+
+(MIN + 2 * (SHEET - 1)) + (1 * abs(SIDE - 1))
+(MAX - 2 * (SHEET - 1)) - (1 * abs(SIDE - 1))
+
+2 - 1 = +1
+2 - 3 = -1
+
+-1 * -1 = +1
+-1 * 1 = -1
+
+(0 * -1) + 1 = +1
+(2 * -1) + 1 = -1
+
+(0 * 7) + 1 = 1
+(1 * 7) + 1 = 8
+
+(MINMAX + ((LOC * 2 * -1) + 1) * 2 * (SHEET - 1)) + ((LOC * 2 * -1) + 1) * (1 * abs(SIDE - 1))
+
+MIN = 1
+MAX = 8
+for SHEET in xrange(1, 2 + 1):
+  print (MIN + 2 * (SHEET - 1)) + 1
+  print (MAX - 2 * (SHEET - 1)) - 1
+  print (MIN + 2 * (SHEET - 1))
+  print (MAX - 2 * (SHEET - 1))
+
+for SHEET in xrange(1, 2 + 1):
+  for SIDE in xrange(2):
+    print (MIN + 2 * (SHEET - 1)) + (abs(SIDE - 1))
+    print (MAX - 2 * (SHEET - 1)) - (abs(SIDE - 1))
+
+for SHEET in xrange(1, 2 + 1):
+  for SIDE in xrange(2):
+    for LOC in xrange(2):
+      print (MAX - 2 * (SHEET - 1)) - (abs(SIDE - 1))
+
+for SHEET in xrange(1, 2 + 1):
+  for SIDE in xrange(2):
+    sideMod = abs(SIDE - 1)
+    for LOC in xrange(2):
+        signMod = ((LOC * 2 * -1) + 1)
+        minmaxMod = ((LOC * 7) + 1)
+        BLOCK = (minmaxMod + 2 * signMod * (SHEET - 1)) + sideMod * signMod
+        print BLOCK
+
+SHEET = 2
+for SIDE in xrange(2):
+  sideMod = abs(SIDE - 1)
+  for LOC in xrange(2):
+      signMod = ((LOC * 2 * -1) + 1)
+      minmaxMod = ((LOC * 7) + 1)
+      BLOCK = (minmaxMod + 2 * signMod * (SHEET - 1)) + sideMod * signMod
+      print BLOCK
+
+
+
+page 1: top of 1st page, 2nd side, upside-down
+page 2: top of 1st page, 1st side, right-side up
+page 3: bottom 1st page, 1st side, right-side up
+page 4: bottom 1st page, 2nd side, upside-down

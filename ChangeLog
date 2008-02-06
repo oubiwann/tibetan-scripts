@@ -1,0 +1,26 @@
+2008.02.06
+
+* Added TODO.
+
+2008.02.05
+
+* Got a head-start on module organization by creating the layouts package (and
+moved code comment out of booklet.py and into layouts/__init__.py).
+* Added admin scripts dir.
+* Added the ChangeLog.
+* Standardized terminology to blocks, sheets, and document (renaming classes
+and varaibles accordingly).
+* Changed the logic in setupSheets to use an algorythm.
+
+2008.02.04
+
+* Created directories for software written to create/manipulate Tibetan pechas.
+* Added scripts and pdf file from previous work.
+* Added notes for work on creating booklets.
+* Added top-level lib dir for pecha modules.
+* Added code from notes as the basis for the booklet module.
+* Converted to function.
+* Created base objects for pecha parts.
+* Added initial logic for creating physical pages (with tests).
+* Added comment to code for getting current blocks.
+* Cleaned up code for physical page and added more tests.

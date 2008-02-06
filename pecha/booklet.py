@@ -1,3 +1,5 @@
+import math
+
 def printLayoutReport(totalPechaPages):
     div, mod = divmod(totalPechaPages, 4)
     if mod == 0:
@@ -24,8 +26,9 @@ def printLayoutReport(totalPechaPages):
         print currentPage, currentActualPage, side, orientation, firstHalf, secondHalf
 
 for tpp in xrange(1,8 + 1):
-    printLayoutReport(tpp)
-    print "\n"
+    #printLayoutReport(tpp)
+    #print "\n"
+    pass
 
 def getOrientation():
     pass
@@ -34,20 +37,26 @@ def getOrientation():
 # XXX move into pecha.base
 RIGHTSIDEUP = 0
 UPSIDEDOWN = 1
+
 FRONT = 0
 BACK = 1
+
+TOP = 0
+BOTTOM = 1
 
 # XXX move into pecha.base
 class Pecha(object):
     """
     A object representing a complete pecha document.
 
-    pages: number of pecha blocks (pecha pages) in the document
-    blocks: number of pecha pages per physical sheet of paper (front and back)
+    blockCount: number of pecha blocks (pecha pages) in the document
+    blocksPerSheet: number of pecha blocks per physical sheet of paper (front
+        and back)
+
     # check page counts
     >>> for x in xrange(1,14+1):
-    ...   p = Pecha(pages=x)
-    ...   p.pageCount, p.physicalPageCount
+    ...   p = Pecha(blockCount=x)
+    ...   p.blockCount, p.sheetCount
     (1, 1)
     (2, 1)
     (3, 1)
@@ -64,145 +73,301 @@ class Pecha(object):
     (14, 4)
 
     # now, let's test some special cases... first, with just one page
-    >>> p = Pecha(pages=1)
-    >>> p.pageCount, p.physicalPageCount
+    >>> p = Pecha(blockCount=1)
+    >>> p.blockCount, p.sheetCount
     (1, 1)
 
     # spectial case with two pecha pages
-    >>> p = Pecha(pages=2)
-    >>> p.pageCount, p.physicalPageCount
+    >>> p = Pecha(blockCount=2)
+    >>> p.blockCount, p.sheetCount
     (2, 1)
 
     # spectial case with six pecha pages
-    >>> p = Pecha(pages=6)
-    >>> p.pageCount, p.physicalPageCount
+    >>> p = Pecha(blockCount=6)
+    >>> p.blockCount, p.sheetCount
     (6, 2)
 
     # spectial case with eight pecha pages
-    >>> p = Pecha(pages=8)
-    >>> p.pageCount, p.physicalPageCount
+    >>> p = Pecha(blockCount=8)
+    >>> p.blockCount, p.sheetCount
     (8, 2)
+    >>> p.sheets[0].number
+    1
+    >>> p.sheets[1].number
+    2
+
+    >>> for b in p.getBlockList():
+    ...   print b
+    <Block: block 1 | top of page 1 | back side | upside-down>
+    <Block: block 2 | top of page 1 | front side | rightside-up>
+    <Block: block 3 | top of page 2 | back side | upside-down>
+    <Block: block 4 | top of page 2 | front side | rightside-up>
+    <Block: block 5 | bottom of page 2 | front side | rightside-up>
+    <Block: block 6 | bottom of page 2 | back side | upside-down>
+    <Block: block 7 | bottom of page 1 | front side | rightside-up>
+    <Block: block 8 | bottom of page 1 | back side | upside-down>
+
+    # now, in page order (top to bottom, front to back)
+    >>> from itertools import chain
+    >>> for b in chain(*[sh.blocks for sh in p.sheets]):
+    ...   print b
+    <Block: block 2 | top of page 1 | front side | rightside-up>
+    <Block: block 7 | bottom of page 1 | front side | rightside-up>
+    <Block: block 1 | top of page 1 | back side | upside-down>
+    <Block: block 8 | bottom of page 1 | back side | upside-down>
+    <Block: block 4 | top of page 2 | front side | rightside-up>
+    <Block: block 5 | bottom of page 2 | front side | rightside-up>
+    <Block: block 3 | top of page 2 | back side | upside-down>
+    <Block: block 6 | bottom of page 2 | back side | upside-down>
 
     # spectial case with 14 pecha pages
-    >>> p = Pecha(pages=14)
-    >>> p.pageCount, p.physicalPageCount
-    (14, 4)
-    >>> len(p.pages) == p.physicalPageCount
-    True
+    #>>> p = Pecha(blockCount=14)
+    #>>> p.blockCount, p.sheetCount
+    #(14, 4)
+    #>>> len(p.sheets) == p.sheetCount
+    #True
+
+    #>>> len(p.getSheet(4).blocks)
+    #2
+    #>>> print p.getSheetByBlock(11)
+
+    # spectial case with 32 pecha pages
+    #>>> p = Pecha(blockCount=32)
+    #>>> for b in p.getBlockList():
+    #...   print b
+    #>>> for b in chain(*[sh.blocks for sh in p.sheets]):
+    #...   print b
+
     """
 
-    def __init__(self, pages, blocks=4):
-        self.pageCount = pages
-        self.blocks = blocks
-        self.pages = []
-        self.setupPages()
+    def __init__(self, blockCount=0, blocksPerSheet=4):
+        self.blocksPerSheet = blocksPerSheet
+        self.blockCount = blockCount
+        self.sheets = []
+        self.setupSheets()
 
-    def _determinePhysicalPageCount(self):
-        div, mod = divmod(self.pageCount, 4)
+    def __repr__(self):
+        # XXX include number of children (blocks) in repr
+        pass
+
+    def _determineSheetCount(self):
+        div, mod = divmod(self.blockCount, self.blocksPerSheet)
         if mod == 0:
-            self.physicalPageCount = div
+            self.sheetCount = div
         else:
-            self.physicalPageCount = div + 1
+            self.sheetCount = div + 1
 
-    def setPageCount(self, number):
-        self._pageCount = number
-        self._determinePhysicalPageCount()
+    def setBlockCount(self, number):
+        self._blockCount = number
+        self._determineSheetCount()
 
-    def getPageCount(self):
-        return self._pageCount
-    pageCount = property(getPageCount, setPageCount)
+    def getBlockCount(self):
+        return self._blockCount
+    blockCount = property(getBlockCount, setBlockCount)
 
-    def setPhysicalPageCount(self, number):
-        self._physicalPageCount = number
+    def setSheetCount(self, number):
+        self._sheetCount = number
 
-    def getPhysicalPageCount(self):
-        return self._physicalPageCount
-    physicalPageCount = property(getPhysicalPageCount, setPhysicalPageCount)
+    def getSheetCount(self):
+        return self._sheetCount
+    sheetCount = property(getSheetCount, setSheetCount)
 
-    def setupPages(self):
-        for pageNum in xrange(1, self.physicalPageCount + 1):
-            pp = PhysicalPage(self, pageNum, self.blocks)
-            self.pages.append(pp)
+    def setupSheets(self):
+        for sheetNum in xrange(1, self.sheetCount + 1):
+            pp = Sheet(self, sheetNum, self.blocksPerSheet)
+            self.sheets.append(pp)
 
-# layouts are determined by how pecha pages are displayed on the physical
-# page. The logic for these decisions is the responsibility of the physical
-# page object. As such, there will need to be a different physical page object
-# for each type of page layout desired.
+    def getBlockList(self):
+        blocks = []
+        for sheet in self.sheets:
+            for block in sheet.blocks:
+                blocks.append(block)
+        blocks.sort()
+        return blocks
+
+    def getPageList(self):
+        pass
+
+    def getSheet(self, sheetNumber):
+        for sheet in self.sheets:
+            if sheet.number == sheetNumber:
+                return sheet
+
+    def getSheetByBlock(self, blockNumber):
+        for sheet in self.sheets:
+            print sheet
+            for block in sheet.blocks:
+                print block
+                if block.number == blockNumber:
+                    return sheet
 
 # XXX Once this code has passing tests, we need to move the Pecha and PechaPage
-# objects into a "base" module, leaving PhysicalPage in the booklet module. The
+# objects into a "base" module, leaving Sheet in the booklet module. The
 # pecha object will need to be updated to have the ability to create different
 # physical page instances, depending upon parameters passed to the constructor.
 
 # XXX move into pecha.layouts.booklet; will need to import orientation and side
 # constants
-class PhysicalPage(object):
+class Sheet(object):
     """
     An object representing a two-sided, pysical piece of paper.
 
-    number: page number
+    document: the parent object, the pecha itself
+    page: page number
     blocks: number of pecha pages per physical sheet of paper (front and back)
 
     # check that the "child" pecha pages get created properly
     >>> p = Pecha(1)
-    >>> pp = PhysicalPage(p, 1)
-    >>> len(pp.blocks) == 1
+    >>> s = Sheet(p, 1)
+    >>> len(s.blocks) == 1
     True
 
     >>> p = Pecha(4)
-    >>> pp = PhysicalPage(p, 1)
-    >>> len(pp.blocks) == 4
+    >>> s = Sheet(p, 1)
+    >>> len(s.blocks) == 4
     True
-    >>> for block in pp.blocks:
+    >>> for block in s.blocks:
     ...   print block
-    <PechaPage: block 1 | page 1 | back side | upside-down>
-    <PechaPage: block 2 | page 1 | front side | rightside-up>
-    <PechaPage: block 3 | page 1 | front side | rightside-up>
-    <PechaPage: block 4 | page 1 | back side | upside-down>
+    <Block: block 1 | top of page 1 | back side | upside-down>
+    <Block: block 2 | top of page 1 | front side | rightside-up>
+    <Block: block 3 | bottom of page 1 | front side | rightside-up>
+    <Block: block 4 | bottom of page 1 | back side | upside-down>
 
     >>> p = Pecha(6)
-    >>> pp = PhysicalPage(p, 2)
+    >>> s = Sheet(p, 2)
 
     # the first page shoudl have 4 blocks and the second should have 2 for a
     # total of 6 blocks (but we're just checking the second page)
-    >>> len(pp.blocks) == 2
+    >>> len(s.blocks) == 2
     True
-    >>> for block in pp.blocks:
+    >>> len(s.blocks)
+    >>> for block in s.blocks:
     ...   print block
-    <PechaPage: block 5 | page 2 | front side | rightside-up>
-    <PechaPage: block 6 | page 2 | back side | upside-down>
+    <Block: block 5 | bottom of page 2 | front side | rightside-up>
+    <Block: block 6 | bottom of page 2 | back side | upside-down>
 
     """
-    def __init__(self, document, number=1, blocks=4):
+    def __init__(self, document, number, blocks=4):
         self.document = document
         self.number = number
         self.blocks = []
-        self.blockCount = blocks
-        self.setupPages()
+        self.blocksPerSheet = blocks
+        self.setupBlocks()
 
+    def __cmp__(self, other):
+        return cmp(self.number, other.number)
 
-    def setupPages(self):
+    def __repr__(self):
+        return "<%s: sheet %s | %s child blocks>" % (
+            self.__class__.__name__, self.number, len(self.blocks))
+
+    def setupBlocks(self):
         """
         Created the pecha pages needed for this physical page.
+
+        The logic for this is simple, but tedious. Examples should help. Let's
+        take a single page, first:
+
+            +------+
+            | 1    |
+            |......|
+            |      |
+            +------+
+
+        The above "image" represents a piece of paper. If folded in half along
+        the dotted line (a mini-booklet), we could read as manny as four blocks
+        printed on this sheet. The blocks would have the following attributes:
+
+            block 1 | top | page 1 | back | upside-down
+            block 2 | top | page 1 | front | rightside-up
+            block 3 | bottom | page 1 | front | rightside-up
+            block 4 | bottom | page 1 | back | upside-down
+
+        With two sheets of paper, we would have the following:
+
+            +------+
+            | 1 +------+
+            |...| 2    |
+            |   |......|
+            +---|      |
+                +------+
+
+            block 1 | top | page 1 | back | upside-down
+            block 2 | top | page 1 | front | rightside-up
+            block 3 | top | page 2 | back | upside-down
+            block 4 | top | page 2 | front | rightside-up
+            block 5 | bottom | page 2 | front | rightside-up
+            block 6 | bottom | page 2 | back | upside-down
+            block 7 | bottom | page 1 | front | rightside-up
+            block 8 | bottom | page 1 | back | upside-down
+
+        Sorting this in page order (top to bottom, front to back) instead of
+        block order, we get:
+
+            sheet 1 | front | top | block 2 | rightside-up
+            sheet 1 | front | bottom | block 7 | rightside-up
+            sheet 1 | back | top | block 1 | upside-down
+            sheet 1 | back | bottom | block 8 | upside-down
+            sheet 2 | front | top | block 4 | rightside-up
+            sheet 2 | front | bottom | block block 5 | rightside-up
+            sheet 2 | back | top | block 3 | upside-down
+            sheet 2 | back | bottom | block 6 | upside-down
+
+        Looking at it in this order, we witness the following pattern:
+
+            2   inner a + 1         front
+            7   inner n - 1         front
+            1   outer a             back
+            8   outer n             back
+            4   inner (a+2) + 1     front
+            5   inner (n-2) - 1     front
+            3   outer (a+2)         back
+            6   outer (n-2)         back
+
+        And this pattern yields the following representations, in increasing
+        generality:
+
+            Representation 1, where MIN=1, MAX=8, and SHEET ranges from 1 to 2:
+            (MIN + 2 * (SHEET - 1)) + 1
+            (MAX - 2 * (SHEET - 1)) - 1
+            (MIN + 2 * (SHEET - 1))
+            (MAX - 2 * (SHEET - 1))
+
+            Representation 2, same as above and with SIDE ranging from 0 to 1:
+            (MIN + 2 * (SHEET - 1)) + (1 * abs(SIDE - 1))
+            (MAX - 2 * (SHEET - 1)) - (1 * abs(SIDE - 1))
+
+            Representation 3, same as above and with LOC ranging from 0 to 1:
+            (((LOC * 7) + 1) + 2 * ((LOC * 2 * -1) + 1) * (SHEET - 1)) +
+                ((LOC * 2 * -1) + 1) * (abs(SIDE - 1))
+
+        This final form is what was used as the algorithm for determining the
+        block number.
         """
-        for blockNum in xrange(1, self.blockCount + 1):
-            # "startCount" is the varaible used to caculate the current pecha
+        '''
+        sheetSequence = 0
+        for blockNum in xrange(1, self.blocksPerSheet + 1):
+            # "startCount" is the varaible used to calculate the current pecha
             # page. The current physical page number times the number of
             # blocks per physical page will give us the highest block number
             # for the current page -- not what we want: if we're on block 13,
             # that would give us 16. For 13-16, we want to start with the
             # total block count for the previous physical page, in this
             # example, 12.
-            startCount = (self.number - 1) * self.blockCount
+            if sheetSequence % self.blocksPerSheet == 0:
+                sheetSequence += 1
+            startCount = (self.number - 1) * self.blocksPerSheet
             currentPage = startCount + blockNum
-            if currentPage > self.document.pageCount:
+            if currentPage > self.document.blockCount:
                 break
-            if currentPage <= self.document.pageCount / 2.0:
+            if currentPage <= self.document.blockCount / 2.0:
                 firstHalf = True
+                location = TOP
             else:
                 firstHalf = False
+                location = BOTTOM
             secondHalf = not firstHalf
-            #print blockNum, startCount + blockNum, self.number, self.document.pageCount
+            #print blockNum, startCount + blockNum, self.sheet, self.document.blockCount
             # determine oritentation and side of paper for block
             if ((firstHalf and (currentPage % 2) == 1) or
                 (secondHalf and (currentPage % 2) == 0)):
@@ -211,38 +376,90 @@ class PhysicalPage(object):
             else:
                 orientation = RIGHTSIDEUP
                 side = FRONT
-            p = PechaPage(self, orientation, side, currentPage)
-            self.blocks.append(p)
+            '''
+        for side in xrange(2):
+            orientation = side
+            sideModifier = abs(side - 1)
+            for location in xrange(2):
+                signModifier = ((location * -2) + 1)
+                minMaxModifier = ((location * 7) + 1)
+                relativeBlockNum = (
+                    minMaxModifier + 2 * signModifier * (self.number - 1)
+                    + sideModifier * signModifier)
+                sheetSet = int(math.ceil(self.number/2.0))
+                blockNum = relativeBlockNum + (sheetSet - 1) * (self.blocksPerSheet * 2)
+                #print self.number, self.number, side, location, blockNum
+                p = Block(self, orientation, side, location, blockNum)
+                self.blocks.append(p)
+        # now for some cleanup - we may need to trim the blocks
+        remainder = self.number * self.blocksPerSheet - self.document.blockCount
+        #print self.document.blockCount, self.number, self.number * self.blocksPerSheet, remainder
+        if remainder > 0:
+            # since we have a remainder, we know this is the last sheet (and
+            # thus last set of blocks) in the pecha; what we now want to do is
+            # remove all blocks higher than the index implied by the remainder,
+            # but this is tricky since the blocks are non-sequential and spread
+            # across both sides of the sheet
+            stopIndex = self.blocksPerSheet - remainder
+            print '            .'
+            print "Before"
+            for sheet in self.document.sheets:
+                print sheet
+                for block in sheet.blocks:
+                    print block
+            for i, sheet in enumerate(self.document.sheets):
+                newBlocks = []
+                for j, block in enumerate(sheet.blocks):
+                    if block.number <= self.document.blockCount:
+                        print i, j, block.number, stopIndex, block
+                        newBlocks.append(block)
+                #print stopIndex, remainder, self.blocks
+                self.document.sheets[i].blocks = newBlocks
+            print "After"
+            for sheet in self.document.sheets:
+                print sheet
+                for block in sheet.blocks:
+                    print block
+            print '            .'
 
 # XXX move into pecha.base
-class PechaPage(object):
+class Block(object):
     """
     An object representing a block of text, classically presented on a side of
     paper with borders and text within those borders.
 
+    paper: the parent object, the page upon which the blocks are printed
     orientation: whether the pecha text block is rightside-up on the paper or
         upside-down
     side: the front or back of the physcial paper
+    location: the top of bottom of the side
     number: the pecha block number
 
-    >>> pp = PechaPage(None, RIGHTSIDEUP, FRONT)
-    >>> pp.orientation == RIGHTSIDEUP
+    >>> b = Block(None, RIGHTSIDEUP, FRONT)
+    >>> b.orientation == RIGHTSIDEUP
     True
-    >>> pp.side == FRONT
+    >>> b.side == FRONT
     True
 
-    >>> pp = PechaPage(None, UPSIDEDOWN, BACK)
-    >>> pp.orientation == UPSIDEDOWN
+    >>> b = Block(None, UPSIDEDOWN, BACK)
+    >>> b.orientation == UPSIDEDOWN
     True
-    >>> pp.side == BACK
+    >>> b.side == BACK
     True
     """
-    def __init__(self, paper, orientation=RIGHTSIDEUP, side=FRONT, number=1):
-        self.paper = paper
+    def __init__(self, sheet, orientation=RIGHTSIDEUP, side=FRONT,
+        location=TOP, number=1):
+        self.sheet = sheet
         self.orientation = orientation
         self.side = side
+        self.location = location
         self.number = number
 
+    def __cmp__(self, other):
+        return cmp(self.number, other.number)
+
+    # XXX need to add code for determining the physical page that a block gets
+    # printed on; currently, the logic is wrong
     def __repr__(self):
         if self.side == FRONT:
             side = 'front'
@@ -252,8 +469,13 @@ class PechaPage(object):
             orient = 'rightside-up'
         else:
             orient = 'upside-down'
-        return "<%s: block %s | page %s | %s side | %s>" % (
-            self.__class__.__name__, self.number, self.paper.number, side, orient)
+        if self.location == TOP:
+            loc = 'top'
+        else:
+            loc = 'bottom'
+        return "<%s: block %s | %s of page %s | %s side | %s>" % (
+            self.__class__.__name__, self.number, loc, self.sheet.number, side,
+            orient)
 
     def setOrientation(self, const):
         self._orient = const
@@ -268,6 +490,13 @@ class PechaPage(object):
     def getSide(self):
         return self._side
     side = property(getSide, setSide)
+
+    def setLocation(self, const):
+        self._loc = const
+
+    def getLocation(self):
+        return self._loc
+    location = property(getLocation, setLocation)
 
 
 
