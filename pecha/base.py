@@ -10,7 +10,6 @@ BACK = 1
 TOP = 0
 BOTTOM = 1
 
-# XXX move into pecha.base
 class Pecha(object):
     """
     A object representing a complete pecha document.
@@ -355,7 +354,6 @@ class Sheet(object):
                     print block
             print '            .'
 
-# XXX move into pecha.base
 class Block(object):
     """
     An object representing a block of text, classically presented on a side of
