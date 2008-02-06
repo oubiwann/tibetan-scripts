@@ -391,8 +391,6 @@ class Block(object):
     def __cmp__(self, other):
         return cmp(self.number, other.number)
 
-    # XXX need to add code for determining the physical page that a block gets
-    # printed on; currently, the logic is wrong
     def __repr__(self):
         if self.side == FRONT:
             side = 'front'
