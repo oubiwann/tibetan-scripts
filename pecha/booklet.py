@@ -310,39 +310,6 @@ class Sheet(object):
         This final form is what was used as the algorithm for determining the
         block number.
         """
-        '''
-        sheetSequence = 0
-        for blockNum in xrange(1, self.blocksPerSheet + 1):
-            # "startCount" is the varaible used to calculate the current pecha
-            # page. The current physical page number times the number of
-            # blocks per physical page will give us the highest block number
-            # for the current page -- not what we want: if we're on block 13,
-            # that would give us 16. For 13-16, we want to start with the
-            # total block count for the previous physical page, in this
-            # example, 12.
-            if sheetSequence % self.blocksPerSheet == 0:
-                sheetSequence += 1
-            startCount = (self.number - 1) * self.blocksPerSheet
-            currentPage = startCount + blockNum
-            if currentPage > self.document.blockCount:
-                break
-            if currentPage <= self.document.blockCount / 2.0:
-                firstHalf = True
-                location = TOP
-            else:
-                firstHalf = False
-                location = BOTTOM
-            secondHalf = not firstHalf
-            #print blockNum, startCount + blockNum, self.sheet, self.document.blockCount
-            # determine oritentation and side of paper for block
-            if ((firstHalf and (currentPage % 2) == 1) or
-                (secondHalf and (currentPage % 2) == 0)):
-                orientation = UPSIDEDOWN
-                side = BACK
-            else:
-                orientation = RIGHTSIDEUP
-                side = FRONT
-            '''
         for side in xrange(2):
             orientation = side
             sideModifier = abs(side - 1)
