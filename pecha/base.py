@@ -1,6 +1,5 @@
 import math
 
-# XXX move into pecha.base
 RIGHTSIDEUP = 0
 UPSIDEDOWN = 1
 
