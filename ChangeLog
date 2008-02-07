@@ -1,5 +1,9 @@
 2008.02.06
 
+* Removed old, commented-out code and debugging print statements.
+
+2008.02.06
+
 * Added TODO.
 * Removed old funtion.
 * Removed commented out method code.

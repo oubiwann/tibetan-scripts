@@ -2,7 +2,6 @@ import math
 
 from pecha.base import Pecha, Block
 
-
 class Sheet(object):
     """
     An object representing a two-sided, pysical piece of paper.
@@ -156,9 +155,6 @@ class Sheet(object):
         This final form is what was used as the algorithm for determining the
         block number.
         """
-        if self.document.blockCount < 0:
-            print 'called!!!'
-            print self.blocks
         for side in xrange(2):
             orientation = side
             sideModifier = abs(side - 1)
@@ -168,70 +164,15 @@ class Sheet(object):
                 relativeBlockNum = (
                     minMaxModifier + 2 * signModifier * (self.number - 1)
                     + sideModifier * signModifier)
-                #sheetSet = int(math.ceil(self.number/2.0))
-                #blockNum = (relativeBlockNum + (sheetSet - 1) *
-                #    (self.blocksPerSheet * 2))
                 blockNum = relativeBlockNum
-                if self.document.blockCount > 14:
-                    print sheetSet, self.number, relativeBlockNum, blockNum
                 p = Block(self, orientation, side, location, blockNum)
                 self.blocks.append(p)
-        #self.r = (self.number, self.blocksPerSheet, self.document.blockCount, self.remainder)
-        #print self.document.blockCount, self.number, self.number * self.blocksPerSheet, remainder
-        if self.document.blockCount > 14:
-            print 'halfway!!!'
-            print self.blocks
-        # now for some cleanup - we may need to trim the blocks
-        #
-        # since we have a remainder, we know this is the last sheet (and
-        # thus last set of blocks) in the pecha; what we now want to do is
-        # remove all blocks higher than the index implied by the remainder,
-        # but this is tricky since the blocks are non-sequential and spread
-        # across both sides of the sheet
-
-        stopIndex = self.blocksPerSheet - self.remainder
-        #if self.document.blockCount < 0:
-        #    for i, sheet in enumerate(self.document.sheets):
-        #        if i < 1:
-        #            print '            .'
-        #            print "Before (%s/%s)" % (self.document.blockCount, self.maxBlocks)
-        #        print sheet
-        #        for block in sheet.blocks:
-        #            print block
-        '''
-        for i, sheet in enumerate(self.document.sheets):
-            newBlocks = []
-            for j, block in enumerate(sheet.blocks):
-                if self.document.blockCount < 0:
-                    print block.number, stopIndex, block, self.maxBlocks
-                if block.number <= self.document.blockCount:
-                    newBlocks.append(block)
-            #print stopIndex, self.remainder, self.blocks
-            if self.document.blockCount < 2:
-                print self.document.sheets[i].number, self.number, len(self.blocks), len(newBlocks)
-                print self.document.sheets[i].blocks == self.blocks
-            self.document.sheets[i].blocks = newBlocks
-            if self.document.sheets[i].number == self.number:
-                self.blocks = newBlocks
-        '''
-        #i = 0
-        #if self.document.blockCount < 0:
-        #    for i, sheet in enumerate(self.document.sheets):
-        #        if i < 1:
-        #            print "After (%s/%s)" % (self.document.blockCount, self.maxBlocks)
-        #        print sheet
-        #        for block in sheet.blocks:
-        #            print block
-        #    if i:
-        #        print '            .'
-        #if self.document.blockCount < 0:
-        #    print self.blocks
-        #    print 'finished!!!'
 
 def pechaFactory(blockCount=0, blocksPerSheet=4):
     """
-    The following tests use the Pecha and Block classes, but depend on those base
-    classes working with the layout class in order to demonstrate functionality.
+    The following tests use the Pecha and Block classes, but depend on those
+    base classes working with the layout class in order to demonstrate
+    functionality.
 
     >>> from itertools import chain
 
