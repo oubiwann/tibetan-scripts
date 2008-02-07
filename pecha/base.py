@@ -17,6 +17,8 @@ class Pecha(object):
     blocksPerSheet: number of pecha blocks per physical sheet of paper (front
         and back)
 
+    >>> from itertools import chain
+
     # check page counts
     >>> for x in xrange(1,14+1):
     ...   p = Pecha(blockCount=x)
@@ -38,21 +40,54 @@ class Pecha(object):
 
     # now, let's test some special cases... first, with just one page
     >>> p = Pecha(blockCount=1)
+
+    #>>> s = Sheet(p, 1)
     >>> p.blockCount, p.sheetCount
     (1, 1)
+    >>> for b in chain(*[sh.blocks for sh in p.sheets]):
+    ...   print b
+    <Block: 1 | top | sheet 1 | back | upside-down>
 
-    # spectial case with two pecha pages
+    # special case with two pecha pages
     >>> p = Pecha(blockCount=2)
+    >>> s = Sheet(p, 1)
     >>> p.blockCount, p.sheetCount
     (2, 1)
+    >>> for b in chain(*[sh.blocks for sh in p.sheets]):
+    ...   print b
+    <Block: 2 | top | sheet 1 | front | rightside-up>
+    <Block: 1 | top | sheet 1 | back | upside-down>
 
-    # spectial case with six pecha pages
+    # special case with four pecha pages
+    >>> p = Pecha(blockCount=4)
+    >>> p.blockCount, p.sheetCount
+    (4, 1)
+    >>> for b in chain(*[sh.blocks for sh in p.sheets]):
+    ...   print b
+    <Block: 2 | top | sheet 1 | front | rightside-up>
+    <Block: 3 | bottom | sheet 1 | front | rightside-up>
+    <Block: 1 | top | sheet 1 | back | upside-down>
+    <Block: 4 | bottom | sheet 1 | back | upside-down>
+
+    # special case with six pecha pages
     >>> p = Pecha(blockCount=6)
+    >>> p
+    <Pecha: 2 child sheets | 6 child blocks>
     >>> p.blockCount, p.sheetCount
     (6, 2)
+    >>> for b in chain(*[sh.blocks for sh in p.sheets]):
+    ...   print b
+    <Block: 2 | top | sheet 1 | front | rightside-up>
+    <Block: 1 | top | sheet 1 | back | upside-down>
+    <Block: 4 | top | sheet 2 | front | rightside-up>
+    <Block: 5 | bottom | sheet 2 | front | rightside-up>
+    <Block: 3 | top | sheet 2 | back | upside-down>
+    <Block: 6 | bottom | sheet 2 | back | upside-down>
 
-    # spectial case with eight pecha pages
+    # special case with eight pecha pages
     >>> p = Pecha(blockCount=8)
+    >>> p
+    <Pecha: 2 child sheets | 8 child blocks>
     >>> p.blockCount, p.sheetCount
     (8, 2)
     >>> p.sheets[0].number
@@ -62,45 +97,59 @@ class Pecha(object):
 
     >>> for b in p.getBlockList():
     ...   print b
-    <Block: block 1 | top of page 1 | back side | upside-down>
-    <Block: block 2 | top of page 1 | front side | rightside-up>
-    <Block: block 3 | top of page 2 | back side | upside-down>
-    <Block: block 4 | top of page 2 | front side | rightside-up>
-    <Block: block 5 | bottom of page 2 | front side | rightside-up>
-    <Block: block 6 | bottom of page 2 | back side | upside-down>
-    <Block: block 7 | bottom of page 1 | front side | rightside-up>
-    <Block: block 8 | bottom of page 1 | back side | upside-down>
+    <Block: 1 | top | sheet 1 | back | upside-down>
+    <Block: 2 | top | sheet 1 | front | rightside-up>
+    <Block: 3 | top | sheet 2 | back | upside-down>
+    <Block: 4 | top | sheet 2 | front | rightside-up>
+    <Block: 5 | bottom | sheet 2 | front | rightside-up>
+    <Block: 6 | bottom | sheet 2 | back | upside-down>
+    <Block: 7 | bottom | sheet 1 | front | rightside-up>
+    <Block: 8 | bottom | sheet 1 | back | upside-down>
 
-    # now, in page order (top to bottom, front to back)
-    >>> from itertools import chain
+    # now, in block order (top to bottom, front to back)
     >>> for b in chain(*[sh.blocks for sh in p.sheets]):
     ...   print b
-    <Block: block 2 | top of page 1 | front side | rightside-up>
-    <Block: block 7 | bottom of page 1 | front side | rightside-up>
-    <Block: block 1 | top of page 1 | back side | upside-down>
-    <Block: block 8 | bottom of page 1 | back side | upside-down>
-    <Block: block 4 | top of page 2 | front side | rightside-up>
-    <Block: block 5 | bottom of page 2 | front side | rightside-up>
-    <Block: block 3 | top of page 2 | back side | upside-down>
-    <Block: block 6 | bottom of page 2 | back side | upside-down>
+    <Block: 2 | top | sheet 1 | front | rightside-up>
+    <Block: 7 | bottom | sheet 1 | front | rightside-up>
+    <Block: 1 | top | sheet 1 | back | upside-down>
+    <Block: 8 | bottom | sheet 1 | back | upside-down>
+    <Block: 4 | top | sheet 2 | front | rightside-up>
+    <Block: 5 | bottom | sheet 2 | front | rightside-up>
+    <Block: 3 | top | sheet 2 | back | upside-down>
+    <Block: 6 | bottom | sheet 2 | back | upside-down>
 
-    # spectial case with 14 pecha pages
-    #>>> p = Pecha(blockCount=14)
-    #>>> p.blockCount, p.sheetCount
-    #(14, 4)
-    #>>> len(p.sheets) == p.sheetCount
-    #True
+    # special case with 14 pecha pages
+    >>> p = Pecha(blockCount=14)
+    >>> p
+    <Pecha: 4 child sheets | 14 child blocks>
 
-    #>>> len(p.getSheet(4).blocks)
-    #2
-    #>>> print p.getSheetByBlock(11)
+    >>> p.blockCount, p.sheetCount
+    (14, 4)
+    >>> len(p.sheets) == p.sheetCount
+    True
+    >>> for b in chain(*[sh.blocks for sh in p.sheets]):
+    ...   print b
+    <Block: 2 | top | sheet 1 | front | rightside-up>
+    <Block: 1 | top | sheet 1 | back | upside-down>
+    <Block: 4 | top | sheet 2 | front | rightside-up>
+    <Block: 13 | bottom | sheet 2 | front | rightside-up>
+    <Block: 3 | top | sheet 2 | back | upside-down>
+    <Block: 14 | bottom | sheet 2 | back | upside-down>
+    <Block: 6 | top | sheet 3 | front | rightside-up>
+    <Block: 11 | bottom | sheet 3 | front | rightside-up>
+    <Block: 5 | top | sheet 3 | back | upside-down>
+    <Block: 12 | bottom | sheet 3 | back | upside-down>
+    <Block: 8 | top | sheet 4 | front | rightside-up>
+    <Block: 9 | bottom | sheet 4 | front | rightside-up>
+    <Block: 7 | top | sheet 4 | back | upside-down>
+    <Block: 10 | bottom | sheet 4 | back | upside-down>
 
-    # spectial case with 32 pecha pages
-    #>>> p = Pecha(blockCount=32)
-    #>>> for b in p.getBlockList():
-    #...   print b
-    #>>> for b in chain(*[sh.blocks for sh in p.sheets]):
-    #...   print b
+
+    >>> len(p.getSheet(1).blocks)
+    2
+
+    >>> print p.getSheetByBlock(11)
+    <Sheet: sheet 3 | 4 child blocks>
 
     """
 
@@ -111,8 +160,9 @@ class Pecha(object):
         self.setupSheets()
 
     def __repr__(self):
-        # XXX include number of children (blocks) in repr
-        pass
+        blockCount = sum([len(s.blocks) for s in self.sheets])
+        return "<%s: %s child sheets | %s child blocks>" % (
+            self.__class__.__name__, len(self.sheets), blockCount)
 
     def _determineSheetCount(self):
         div, mod = divmod(self.blockCount, self.blocksPerSheet)
@@ -140,6 +190,15 @@ class Pecha(object):
         for sheetNum in xrange(1, self.sheetCount + 1):
             pp = Sheet(self, sheetNum, self.blocksPerSheet)
             self.sheets.append(pp)
+        self.cleanupBlocks()
+
+    def cleanupBlocks(self):
+        for i, sheet in enumerate(self.sheets):
+            newBlocks = []
+            for j, block in enumerate(sheet.blocks):
+                if block.number <= self.blockCount:
+                    newBlocks.append(block)
+            self.sheets[i].blocks = newBlocks
 
     def getBlockList(self):
         blocks = []
@@ -159,9 +218,7 @@ class Pecha(object):
 
     def getSheetByBlock(self, blockNumber):
         for sheet in self.sheets:
-            print sheet
             for block in sheet.blocks:
-                print block
                 if block.number == blockNumber:
                     return sheet
 
@@ -183,7 +240,14 @@ class Sheet(object):
     # check that the "child" pecha pages get created properly
     >>> p = Pecha(1)
     >>> s = Sheet(p, 1)
-    >>> len(s.blocks) == 1
+    >>> p.cleanupBlocks()
+    >>> p.sheets[0] == s
+    True
+    >>> for block in p.sheets[0].blocks:
+    ...   print block
+    <Block: 1 | top | sheet 1 | back | upside-down>
+
+    >>> len(p.sheets[0].blocks) == 1
     True
 
     >>> p = Pecha(4)
@@ -192,23 +256,24 @@ class Sheet(object):
     True
     >>> for block in s.blocks:
     ...   print block
-    <Block: block 1 | top of page 1 | back side | upside-down>
-    <Block: block 2 | top of page 1 | front side | rightside-up>
-    <Block: block 3 | bottom of page 1 | front side | rightside-up>
-    <Block: block 4 | bottom of page 1 | back side | upside-down>
+    <Block: 2 | top | sheet 1 | front | rightside-up>
+    <Block: 3 | bottom | sheet 1 | front | rightside-up>
+    <Block: 1 | top | sheet 1 | back | upside-down>
+    <Block: 4 | bottom | sheet 1 | back | upside-down>
 
     >>> p = Pecha(6)
-    >>> s = Sheet(p, 2)
+    >>> s = Sheet(p, 1)
+    >>> p.cleanupBlocks()
 
-    # the first page shoudl have 4 blocks and the second should have 2 for a
-    # total of 6 blocks (but we're just checking the second page)
-    >>> len(s.blocks) == 2
+    # the first page should have 2 blocks and the second should have 4 for a
+    # total of 6 blocks (but we're just creating and checking the first page)
+    >>> len(p.sheets[0].blocks) == 2
     True
-    >>> len(s.blocks)
-    >>> for block in s.blocks:
+    >>> for block in p.sheets[0].blocks:
     ...   print block
-    <Block: block 5 | bottom of page 2 | front side | rightside-up>
-    <Block: block 6 | bottom of page 2 | back side | upside-down>
+    <Block: 2 | top | sheet 1 | front | rightside-up>
+    <Block: 1 | top | sheet 1 | back | upside-down>
+
 
     """
     def __init__(self, document, number, blocks=4):
@@ -216,7 +281,11 @@ class Sheet(object):
         self.number = number
         self.blocks = []
         self.blocksPerSheet = blocks
+        self.remainder = number * blocks - document.blockCount
+        self.maxBlocks = int(math.ceil(document.blockCount/float(blocks)) *
+                             blocks)
         self.setupBlocks()
+        self.document.cleanupBlocks()
 
     def __cmp__(self, other):
         return cmp(self.number, other.number)
@@ -305,55 +374,85 @@ class Sheet(object):
             (((LOC * 7) + 1) + 2 * ((LOC * 2 * -1) + 1) * (SHEET - 1)) +
                 ((LOC * 2 * -1) + 1) * (abs(SIDE - 1))
 
+        To generalize for more than just the 2-sheet (8 block max) example, we
+        make one change:
+            (((LOC * (MAX - 1)) + 1) + 2 * ((LOC * 2 * -1) + 1) * (SHEET - 1)) +
+                ((LOC * 2 * -1) + 1) * (abs(SIDE - 1))
+
         This final form is what was used as the algorithm for determining the
         block number.
         """
+        if self.document.blockCount < 0:
+            print 'called!!!'
+            print self.blocks
         for side in xrange(2):
             orientation = side
             sideModifier = abs(side - 1)
             for location in xrange(2):
-                maxBlocks = int((self.document.blockCount/float(self.blocksPerSheet) * self.blocksPerSheet))
                 signModifier = ((location * - 2) + 1)
-                minMaxModifier = ((location * (maxBlocks - 1)) + 1)
+                minMaxModifier = ((location * (self.maxBlocks - 1)) + 1)
                 relativeBlockNum = (
                     minMaxModifier + 2 * signModifier * (self.number - 1)
                     + sideModifier * signModifier)
-                sheetSet = int(math.ceil(self.number/2.0))
-                blockNum = relativeBlockNum + (sheetSet - 1) * (self.blocksPerSheet * 2)
-                #print self.number, self.number, side, location, blockNum
+                #sheetSet = int(math.ceil(self.number/2.0))
+                #blockNum = (relativeBlockNum + (sheetSet - 1) *
+                #    (self.blocksPerSheet * 2))
+                blockNum = relativeBlockNum
+                if self.document.blockCount > 14:
+                    print sheetSet, self.number, relativeBlockNum, blockNum
                 p = Block(self, orientation, side, location, blockNum)
                 self.blocks.append(p)
-        # now for some cleanup - we may need to trim the blocks
-        remainder = self.number * self.blocksPerSheet - self.document.blockCount
+        #self.r = (self.number, self.blocksPerSheet, self.document.blockCount, self.remainder)
         #print self.document.blockCount, self.number, self.number * self.blocksPerSheet, remainder
-        #if remainder > 0:
-        if False:
-            # since we have a remainder, we know this is the last sheet (and
-            # thus last set of blocks) in the pecha; what we now want to do is
-            # remove all blocks higher than the index implied by the remainder,
-            # but this is tricky since the blocks are non-sequential and spread
-            # across both sides of the sheet
-            stopIndex = self.blocksPerSheet - remainder
-            print '            .'
-            print "Before"
-            for sheet in self.document.sheets:
-                print sheet
-                for block in sheet.blocks:
-                    print block
-            for i, sheet in enumerate(self.document.sheets):
-                newBlocks = []
-                for j, block in enumerate(sheet.blocks):
-                    if block.number <= self.document.blockCount:
-                        print i, j, block.number, stopIndex, block
-                        newBlocks.append(block)
-                #print stopIndex, remainder, self.blocks
-                self.document.sheets[i].blocks = newBlocks
-            print "After"
-            for sheet in self.document.sheets:
-                print sheet
-                for block in sheet.blocks:
-                    print block
-            print '            .'
+        if self.document.blockCount > 14:
+            print 'halfway!!!'
+            print self.blocks
+        # now for some cleanup - we may need to trim the blocks
+        #
+        # since we have a remainder, we know this is the last sheet (and
+        # thus last set of blocks) in the pecha; what we now want to do is
+        # remove all blocks higher than the index implied by the remainder,
+        # but this is tricky since the blocks are non-sequential and spread
+        # across both sides of the sheet
+
+        stopIndex = self.blocksPerSheet - self.remainder
+        #if self.document.blockCount < 0:
+        #    for i, sheet in enumerate(self.document.sheets):
+        #        if i < 1:
+        #            print '            .'
+        #            print "Before (%s/%s)" % (self.document.blockCount, self.maxBlocks)
+        #        print sheet
+        #        for block in sheet.blocks:
+        #            print block
+        '''
+        for i, sheet in enumerate(self.document.sheets):
+            newBlocks = []
+            for j, block in enumerate(sheet.blocks):
+                if self.document.blockCount < 0:
+                    print block.number, stopIndex, block, self.maxBlocks
+                if block.number <= self.document.blockCount:
+                    newBlocks.append(block)
+            #print stopIndex, self.remainder, self.blocks
+            if self.document.blockCount < 2:
+                print self.document.sheets[i].number, self.number, len(self.blocks), len(newBlocks)
+                print self.document.sheets[i].blocks == self.blocks
+            self.document.sheets[i].blocks = newBlocks
+            if self.document.sheets[i].number == self.number:
+                self.blocks = newBlocks
+        '''
+        #i = 0
+        #if self.document.blockCount < 0:
+        #    for i, sheet in enumerate(self.document.sheets):
+        #        if i < 1:
+        #            print "After (%s/%s)" % (self.document.blockCount, self.maxBlocks)
+        #        print sheet
+        #        for block in sheet.blocks:
+        #            print block
+        #    if i:
+        #        print '            .'
+        #if self.document.blockCount < 0:
+        #    print self.blocks
+        #    print 'finished!!!'
 
 class Block(object):
     """
@@ -403,7 +502,7 @@ class Block(object):
             loc = 'top'
         else:
             loc = 'bottom'
-        return "<%s: block %s | %s of page %s | %s side | %s>" % (
+        return "<%s: %s | %s | sheet %s | %s | %s>" % (
             self.__class__.__name__, self.number, loc, self.sheet.number, side,
             orient)
 
@@ -427,8 +526,6 @@ class Block(object):
     def getLocation(self):
         return self._loc
     location = property(getLocation, setLocation)
-
-
 
 def test():
     import doctest

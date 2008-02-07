@@ -162,7 +162,21 @@ for SIDE in xrange(2):
       BLOCK = (minmaxMod + 2 * signMod * (SHEET - 1)) + sideMod * signMod
       print BLOCK
 
+i = 0
+for SHEET in xrange(1, int(ceil(MAX/4.0)) + 1):
+  for SIDE in xrange(2):
+    sideMod = abs(SIDE - 1)
+    for LOC in xrange(2):
+        signMod = ((LOC * 2 * -1) + 1)
+        minmaxMod = ((LOC * (MAX - 1)) + 1)
+        BLOCK = (minmaxMod + 2 * signMod * (SHEET - 1)) + sideMod * signMod
+        i += 1
+        print i, BLOCK, (SHEET, SIDE, LOC)
 
+for SHEET in xrange(1, int(ceil(MAX/4.0)) + 1):
+  for SIDE in xrange(2):
+    for LOC in xrange(2):
+      (((LOC * (MAX - 1)) + 1) + 2 * ((LOC * 2 * -1) + 1) * (SHEET - 1)) + ((LOC * 2 * -1) + 1) * (abs(SIDE - 1))
 
 1 Sheet (between 1 and 4 blocks)
 +------+
@@ -245,4 +259,6 @@ sheet 4 | front | top | block 8 | rightside-up          8
 sheet 4 | front | bottom | block 9 | rightside-up       9
 sheet 4 | back | top | block 7 | upside-down            7
 sheet 4 | back | bottom | block 10 | upside-down        10
+
+
 

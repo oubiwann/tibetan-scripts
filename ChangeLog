@@ -6,6 +6,11 @@
 * Removed old comment.
 * Renamed module to 'base'.
 * Fixed bug in Sheet.setupBlocks.
+* Fixed maxBlocks calculation.
+* Made block cleanup always run, regardless of remainder value (since there are
+cases when blocks need to be cleaned up even when there's no positive
+remainder).
+* Added a repr for the Pecha class.
 
 2008.02.05
 
