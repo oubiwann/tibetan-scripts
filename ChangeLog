@@ -11,6 +11,11 @@
 cases when blocks need to be cleaned up even when there's no positive
 remainder).
 * Added a repr for the Pecha class.
+* Moved Sheet into layout.booklet.
+* Added Pecha factory to layouts.booklet for setting up the proper layout
+classes for booklet pechas.
+* Updated the Pecha class to accept a layout class in its constructor.
+* Added a test runner for all module doctests.
 
 2008.02.05
 
