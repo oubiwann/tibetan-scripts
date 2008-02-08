@@ -1,3 +1,7 @@
+2008.02.08
+
+* Added support for cropping PDF files.
+
 2008.02.07
 
 * Removed old, commented-out code and debugging print statements.
