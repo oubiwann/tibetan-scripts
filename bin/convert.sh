@@ -47,6 +47,7 @@ fi
 ###################
 #
 # Merge PDF files, interleaving even and odd page
+#
 echo "Merging PDF files $MARKED_PDF and $EVEN_PDF ..."
 python ./bin/interLeave.py $MARKED_PDF $EVEN_PDF
 
