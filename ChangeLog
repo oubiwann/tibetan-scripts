@@ -1,6 +1,8 @@
 2008.02.07
 
 * Removed old, commented-out code and debugging print statements.
+* Started hacking on some code that will eventually assemble PDF fragments into
+whole pecha files.
 
 2008.02.06
 
