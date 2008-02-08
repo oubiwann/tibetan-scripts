@@ -1,6 +1,9 @@
 2008.02.08
 
 * Added support for cropping PDF files.
+* Added support for rotating blocks.
+* Moved cropping and rotating code into functions.
+* Updated TODO.
 
 2008.02.07
 
