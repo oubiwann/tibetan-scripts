@@ -4,6 +4,9 @@
 * Added support for rotating blocks.
 * Moved cropping and rotating code into functions.
 * Updated TODO.
+* Moved PDF processing from bin/addCropMarks.py to pecha.assembler.
+* Added test/sources.
+* Added script for creating booklets.
 
 2008.02.07
 
