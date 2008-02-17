@@ -35,11 +35,15 @@ for FILE in $FILES
 #
 # After converting to PDF, we're ready to add the crop markers
 #
-echo "Adding crop marks to $ODD_PDF ..."
-if [[ "$STYLE" == "trim" ]]; then
-    python ./bin/addCropMarks.py --flip=True --style=trim $ODD_PDF
+if [[ "$STYLE" != "nocrop" ]]; then
+    echo "Adding crop marks to $ODD_PDF ..."
+    if [[ "$STYLE" == "trim" ]]; then
+        python ./bin/addCropMarks.py --flip=True --style=trim $ODD_PDF
+    else
+        python ./bin/addCropMarks.py --flip=True $ODD_PDF
+    fi
 else
-    python ./bin/addCropMarks.py --flip=True $ODD_PDF
+    MARKED_PDF=$ODD_PDF
 fi
 
 ###################

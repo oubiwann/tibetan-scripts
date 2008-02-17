@@ -1,5 +1,9 @@
 2008.02.08
 
+* Added a nocrop option for the convert script.
+
+2008.02.08
+
 * Added support for cropping PDF files.
 * Added support for rotating blocks.
 * Moved cropping and rotating code into functions.
