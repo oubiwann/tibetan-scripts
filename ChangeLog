@@ -5,6 +5,8 @@ runner.
 * Added code to stubbed unit tests.
 * Added a docs directory.
 * Added the beginnings of a pecha protocol.
+* Added dependencies.
+* Added placeholder for rtf+pyparsing code.
 
 2008.02.16
 
