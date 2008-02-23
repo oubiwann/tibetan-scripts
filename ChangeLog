@@ -7,6 +7,9 @@ runner.
 * Added the beginnings of a pecha protocol.
 * Added dependencies.
 * Added placeholder for rtf+pyparsing code.
+* Added sample RTF docs for use in unit tests.
+* Started adding parsing code to pecha.rtf.
+* Added a placehilder for the pecha protocol code.
 
 2008.02.16
 
