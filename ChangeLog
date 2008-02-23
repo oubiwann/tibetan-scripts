@@ -10,6 +10,8 @@ runner.
 * Added sample RTF docs for use in unit tests.
 * Started adding parsing code to pecha.rtf.
 * Added a placehilder for the pecha protocol code.
+* Moved test RTF files into a "mac" dir and created a "windows" dir for later
+use.
 
 2008.02.16
 
