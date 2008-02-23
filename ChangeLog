@@ -1,3 +1,8 @@
+2008.02.23
+
+* Added stubbs and doctests for some util functions and added them to test
+runner.
+
 2008.02.16
 
 * Added a nocrop option for the convert script.

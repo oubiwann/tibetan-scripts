@@ -5,6 +5,7 @@ import doctest
 modules = [
     'pecha.base',
     'pecha.layouts.booklet',
+    'pecha.util',
 ]
 
 suite = unittest.TestSuite()
