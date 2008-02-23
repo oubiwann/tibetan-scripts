@@ -3,6 +3,7 @@
 * Added stubbs and doctests for some util functions and added them to test
 runner.
 * Added code to stubbed unit tests.
+* Added a docs directory.
 
 2008.02.16
 
