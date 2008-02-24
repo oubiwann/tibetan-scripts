@@ -15,6 +15,7 @@ use.
 * Moved grammar and parsed code into their own classes.
 * Added doc tests to rtf module and put those in the runner.
 * Added support for verion and character set in the grammar.
+* Added initial support for parsing the font table.
 
 2008.02.16
 

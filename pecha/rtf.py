@@ -12,6 +12,8 @@ class RTFParseError(RTFError):
 
 class RTFGrammar(object):
     """
+
+    # let's check out parsing of the opening controls
     >>> doc = r'''{\\rtf1\\ansi\\ansicpg1252\cocoartf949\cocoasubrtf270
     ... }'''
     >>> tokens = RTFGrammar().rtfDoc.parseString(doc)
@@ -19,6 +21,20 @@ class RTFGrammar(object):
     '1'
     >>> tokens.characterSet
     'ansi'
+
+    # now the font table
+    >>> doc = r'''{\\rtf1\\ansi\\ansicpg1252\cocoartf949\cocoasubrtf270
+    ... {\\fonttbl\\f0\\froman\\fcharset0 Times-Roman;}
+    ... }'''
+    >>> tokens = RTFGrammar().rtfDoc.parseString(doc)
+    >>> tokens.fontNumber
+    '0'
+    >>> tokens.fontFamily
+    'roman'
+    >>> tokens.fontCharSet
+    '0'
+    >>> tokens.fontName
+    'Times-Roman'
     """
 
     def __init__(self):
@@ -34,17 +50,36 @@ class RTFGrammar(object):
         baseControl = Combine(Literal('\\') + controlLabel + controlValue
                               ).setResultsName('baseControl')
 
-        # in some cases (color and font table declarations), control has ';' suffix
-        rtfControl = Combine(baseControl + separator) | baseControl
-        rtfControl.setResultsName('control')
+        # in some cases (color and font table declarations), control has ';'
+        # suffix
+        rtfControl = Combine(baseControl + Optional(separator)
+                             ).setResultsName('control')
 
+        rtfGroup = leftBracket + OneOrMore(rtfControl) + rightBracket
+
+        # opening controls
         rtfVersionNumber = Word(nums).setResultsName('version')
         rtfVersion = Combine(Literal('\\') + 'rtf') + rtfVersionNumber
-
         charSet = Literal('\\') + Word(alphas).setResultsName('characterSet')
 
+        # get font table
+        fontTableControl = Combine(Literal('\\') + 'fonttbl')
+        fontNumber = Literal('\\f') + Word(nums).setResultsName('fontNumber')
+        fontFamily = Literal('\\f') + Word(alphanums
+                             ).setResultsName('fontFamily')
+        fontCharSet = Literal('\\f' + 'charset') + Word(alphanums
+                              ).setResultsName('fontCharSet')
+        fontName = Word(alphanums + '-').setResultsName('fontName')
+        font = (fontNumber + fontFamily + fontCharSet + Optional(space) +
+            fontName)
+        fontTable = (leftBracket + fontTableControl + font +
+            Optional(separator) + rightBracket)
+
+        # assemble the grammar
         self.rtfDoc = (leftBracket + rtfVersion + charSet +
             OneOrMore(rtfControl) +
+            Optional(fontTable) +
+            #OneOrMore(rtfGroup) +
             rightBracket
             )
 
