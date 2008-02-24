@@ -93,74 +93,104 @@ class RTFGrammar(object):
     2 roman Symbol 05050102010706020507
     3 roman Times New Roman (Hebrew) 0
     """
+    separator = Literal(';')
+    space = Literal(' ')
+    white = White()
+    leftBracket = Literal('{')
+    rightBracket = Literal('}')
+    bracket = leftBracket | rightBracket.setResultsName('bracket')
 
-    def __init__(self):
-        separator = Literal(';')
-        space = Literal(' ')
-        white = White()
-        leftBracket = Literal('{')
-        rightBracket = Literal('}')
-        bracket = leftBracket | rightBracket.setResultsName('bracket')
+    # basic RTF control codes, ie. "\labelname3434"
+    controlLabel = Combine(Word(alphas + "'") + Optional(Word(nums)))
+    controlValue = Optional(space) + Optional(Word(alphanums + '-'))
+    baseControl = Combine(Literal('\\') + controlLabel + controlValue
+                          ).setResultsName('baseControl')
 
-        # basic RTF control codes, ie. "\labelname3434"
-        controlLabel = Combine(Word(alphas + "'") + Optional(Word(nums)))
-        controlValue = Optional(space) + Optional(Word(alphanums + '-'))
-        baseControl = Combine(Literal('\\') + controlLabel + controlValue
-                              ).setResultsName('baseControl')
+    # in some cases (color and font table declarations), control has ';'
+    # suffix
+    rtfControl = Combine(baseControl + Optional(separator)
+                         ).setResultsName('control')
 
-        # in some cases (color and font table declarations), control has ';'
-        # suffix
-        rtfControl = Combine(baseControl + Optional(separator)
-                             ).setResultsName('control')
+    rtfGroup = leftBracket + OneOrMore(rtfControl) + rightBracket
 
-        rtfGroup = leftBracket + OneOrMore(rtfControl) + rightBracket
+    # opening controls
+    rtfVersionNumber = Word(nums).setResultsName('version')
+    rtfVersion = Combine(Literal('\\') + 'rtf') + rtfVersionNumber
+    charSet = Literal('\\') + Word(alphas).setResultsName('characterSet')
+    codePage = Literal('\\ansicpg') + Word(nums).setResultsName('codePage')
 
-        # opening controls
-        rtfVersionNumber = Word(nums).setResultsName('version')
-        rtfVersion = Combine(Literal('\\') + 'rtf') + rtfVersionNumber
-        charSet = Literal('\\') + Word(alphas).setResultsName('characterSet')
-        codePage = Literal('\\ansicpg') + Word(nums).setResultsName('codePage')
+    # default font
+    # XXX
 
-        # default font
-        # XXX
+    # get font table
+    fontTableControl = Combine(Literal('\\') + 'fonttbl')
+    fontNumber = Literal('\\f') + Word(nums).setResultsName('fontNumber')
+    fontFamily = Literal('\\f') + Word(alphanums
+                         ).setResultsName('fontFamily')
+    fontCharSet = Literal('\\f' + 'charset') + Word(alphanums
+                          ).setResultsName('fontCharSet')
+    fontPitch = Literal('\\f' + 'prq') + oneOf('0 1 2'
+                        ).setResultsName('fontPitch')
+    panose = (leftBracket + Combine(Literal('\\*\\' + 'panose') + space) +
+        Word(nums).setResultsName('panose') + rightBracket)
+    fontName = Word(alphanums + '()- ').setResultsName('fontName')
+    # font table RTF v1.0
+    fontGroupCombined = Group(
+        fontNumber + fontFamily + fontCharSet + Optional(space) +
+        fontName + Optional(separator)
+        )
+    # font table RTF v1.2+
+    fontGroupSeparate = Group(
+        leftBracket +
+        fontNumber + fontFamily + fontCharSet +
+        Optional(fontPitch) + Optional(space) + Optional(panose) + # | space +
+        fontName + separator +
+        rightBracket
+        )
+    font = fontGroupCombined | fontGroupSeparate
+    fontTable = (leftBracket + fontTableControl +
+        OneOrMore(font).setResultsName('fonts') +
+        rightBracket)
 
-        # get font table
-        fontTableControl = Combine(Literal('\\') + 'fonttbl')
-        fontNumber = Literal('\\f') + Word(nums).setResultsName('fontNumber')
-        fontFamily = Literal('\\f') + Word(alphanums
-                             ).setResultsName('fontFamily')
-        fontCharSet = Literal('\\f' + 'charset') + Word(alphanums
-                              ).setResultsName('fontCharSet')
-        fontPitch = Literal('\\f' + 'prq') + oneOf('0 1 2'
-                            ).setResultsName('fontPitch')
-        panose = (leftBracket + Combine(Literal('\\*\\' + 'panose') + space) +
-            Word(nums).setResultsName('panose') + rightBracket)
-        fontName = Word(alphanums + '()- ').setResultsName('fontName')
-        # font table RTF v1.0
-        fontGroupCombined = Group(
-            fontNumber + fontFamily + fontCharSet + Optional(space) +
-            fontName + Optional(separator)
-            )
-        # font table RTF v1.2+
-        fontGroupSeparate = Group(
-            leftBracket +
-            fontNumber + fontFamily + fontCharSet +
-            Optional(fontPitch) + Optional(space) + Optional(panose) + # | space +
-            fontName + separator +
-            rightBracket
-            )
-        font = fontGroupCombined | fontGroupSeparate
-        fontTable = (leftBracket + fontTableControl +
-            OneOrMore(font).setResultsName('fonts') +
-            rightBracket)
+    # file table
+    # XXX
 
-        # assemble the grammar
-        self.rtfDoc = (leftBracket + rtfVersion + charSet + codePage +
-            OneOrMore(rtfControl) +
-            fontTable +
-            #OneOrMore(rtfGroup) +
-            rightBracket
-            )
+    # color table
+    # XXX
+
+    # stylesheet
+    # XXX
+
+    # list table
+    # XXX
+
+    # revision table
+    # XXX
+
+    # document info
+    # XXX
+
+    # document format
+    # XXX
+
+    # section format
+    # XXX
+
+    # header/footer
+    # XXX
+
+    # paragraph text
+    
+    # character text
+    
+
+    # assemble the grammar
+    rtfDoc = (leftBracket + rtfVersion + charSet + codePage +
+        OneOrMore(rtfControl) +
+        fontTable +
+        #OneOrMore(rtfGroup) +
+        rightBracket
+        )
 
     def getGrammar(self):
         return self.rtfDoc
