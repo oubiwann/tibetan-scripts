@@ -12,6 +12,9 @@ runner.
 * Added a placehilder for the pecha protocol code.
 * Moved test RTF files into a "mac" dir and created a "windows" dir for later
 use.
+* Moved grammar and parsed code into their own classes.
+* Added doc tests to rtf module and put those in the runner.
+* Added support for verion and character set in the grammar.
 
 2008.02.16
 
