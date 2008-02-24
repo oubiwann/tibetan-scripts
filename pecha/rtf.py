@@ -1,4 +1,18 @@
-from pyparsing import Optional, Literal, Word, Group
+"""
+An RTF file has the following syntax:
+<File>:  '{' <header> <document>'}'
+
+The header has the following syntax:
+
+<header>: \rtf <charset> \deff? <fonttbl> <filetbl>? <colortbl>? <stylesheet>?  <listtables>? <revtbl>?
+
+The document area has the following syntax.
+<document>:  <info>? <docfmt>* <section>+
+
+Each section in the RTF file has the following syntax:
+<section>:   <secfmt>* <hdrftr>? <para>+ (\sect <section>)?
+"""
+from pyparsing import Optional, Literal, Word, Group, White
 from pyparsing import Suppress, Combine, replaceWith
 from pyparsing import alphas, nums, printables, alphanums
 from pyparsing import restOfLine, oneOf, OneOrMore, ZeroOrMore
@@ -12,34 +26,78 @@ class RTFParseError(RTFError):
 
 class RTFGrammar(object):
     """
+    # get the grammar
+    >>> grammar = RTFGrammar().getGrammar()
 
     # let's check out parsing of the opening controls
     >>> doc = r'''{\\rtf1\\ansi\\ansicpg1252\cocoartf949\cocoasubrtf270
+    ... {\\fonttbl\\f0\\froman\\fcharset0 Times-Roman;}
     ... }'''
-    >>> tokens = RTFGrammar().rtfDoc.parseString(doc)
+    >>> tokens = grammar.parseString(doc)
     >>> tokens.version
     '1'
     >>> tokens.characterSet
     'ansi'
+    >>> tokens.codePage
+    '1252'
 
-    # now the font table
+    # now the font table, RTF v1.0
     >>> doc = r'''{\\rtf1\\ansi\\ansicpg1252\cocoartf949\cocoasubrtf270
     ... {\\fonttbl\\f0\\froman\\fcharset0 Times-Roman;}
     ... }'''
-    >>> tokens = RTFGrammar().rtfDoc.parseString(doc)
-    >>> tokens.fontNumber
+    >>> tokens = grammar.parseString(doc)
+    >>> tokens.fonts[0].fontNumber
     '0'
-    >>> tokens.fontFamily
+    >>> tokens.fonts[0].fontFamily
     'roman'
-    >>> tokens.fontCharSet
+    >>> tokens.fonts[0].fontCharSet
     '0'
-    >>> tokens.fontName
+    >>> tokens.fonts[0].fontName
     'Times-Roman'
+
+    # with more fonts
+    >>> doc = r'''{\\rtf1\\ansi\\ansicpg1252\cocoartf949\cocoasubrtf270
+    ... {\\fonttbl\\f0\\froman\\fcharset0 Times-Roman;\\f1\\fswiss\\fcharset0 ArialMT;}
+    ... }'''
+    >>> tokens = grammar.parseString(doc)
+    >>> for font in tokens.fonts:
+    ...   print font.fontNumber, font.fontFamily, font.fontName
+    0 roman Times-Roman
+    1 swiss ArialMT
+
+    # font table, RTF v1.2+
+    >>> doc = r'''{\\rtf1\\ansi\\ansicpg1252\uc1
+    ...   {\\fonttbl{\\f0\\froman\\fcharset0\\fprq2{\*\panose 02020603050405020304}Times New Roman;}
+    ...   {\\f1\\fmodern\\fcharset0\\fprq1{\*\panose 02070309020205020404}Courier New;}
+    ...   {\\f2\\froman\\fcharset2\\fprq2{\*\panose 05050102010706020507}Symbol;}}
+    ...   }'''
+    >>> tokens = grammar.parseString(doc)
+    >>> for font in tokens.fonts:
+    ...   print font.fontNumber, font.fontFamily, font.fontName, font.panose
+    0 roman Times New Roman 02020603050405020304
+    1 modern Courier New 02070309020205020404
+    2 roman Symbol 05050102010706020507
+
+    # font table with panose optional
+    >>> doc = r'''{\\rtf1\\ansi\\ansicpg1252\uc1
+    ...   {\\fonttbl{\\f0\\froman\\fcharset0\\fprq2{\*\panose 02020603050405020304}Times New Roman;}
+    ...   {\\f1\\fmodern\\fcharset0\\fprq1{\*\panose 02070309020205020404}Courier New;}
+    ...   {\\f2\\froman\\fcharset2\\fprq2{\*\panose 05050102010706020507}Symbol;}
+    ...   {\\f3\\froman\\fcharset3\\fprq2 Times New Roman (Hebrew);}}
+    ...   }'''
+    >>> tokens = grammar.parseString(doc)
+    >>> for font in tokens.fonts:
+    ...   print font.fontNumber, font.fontFamily, font.fontName, font.panose or 0
+    0 roman Times New Roman 02020603050405020304
+    1 modern Courier New 02070309020205020404
+    2 roman Symbol 05050102010706020507
+    3 roman Times New Roman (Hebrew) 0
     """
 
     def __init__(self):
         separator = Literal(';')
         space = Literal(' ')
+        white = White()
         leftBracket = Literal('{')
         rightBracket = Literal('}')
         bracket = leftBracket | rightBracket.setResultsName('bracket')
@@ -61,6 +119,10 @@ class RTFGrammar(object):
         rtfVersionNumber = Word(nums).setResultsName('version')
         rtfVersion = Combine(Literal('\\') + 'rtf') + rtfVersionNumber
         charSet = Literal('\\') + Word(alphas).setResultsName('characterSet')
+        codePage = Literal('\\ansicpg') + Word(nums).setResultsName('codePage')
+
+        # default font
+        # XXX
 
         # get font table
         fontTableControl = Combine(Literal('\\') + 'fonttbl')
@@ -69,19 +131,39 @@ class RTFGrammar(object):
                              ).setResultsName('fontFamily')
         fontCharSet = Literal('\\f' + 'charset') + Word(alphanums
                               ).setResultsName('fontCharSet')
-        fontName = Word(alphanums + '-').setResultsName('fontName')
-        font = (fontNumber + fontFamily + fontCharSet + Optional(space) +
-            fontName)
-        fontTable = (leftBracket + fontTableControl + font +
-            Optional(separator) + rightBracket)
+        fontPitch = Literal('\\f' + 'prq') + oneOf('0 1 2'
+                            ).setResultsName('fontPitch')
+        panose = (leftBracket + Combine(Literal('\\*\\' + 'panose') + space) +
+            Word(nums).setResultsName('panose') + rightBracket)
+        fontName = Word(alphanums + '()- ').setResultsName('fontName')
+        # font table RTF v1.0
+        fontGroupCombined = Group(
+            fontNumber + fontFamily + fontCharSet + Optional(space) +
+            fontName + Optional(separator)
+            )
+        # font table RTF v1.2+
+        fontGroupSeparate = Group(
+            leftBracket +
+            fontNumber + fontFamily + fontCharSet +
+            Optional(fontPitch) + Optional(space) + Optional(panose) + # | space +
+            fontName + separator +
+            rightBracket
+            )
+        font = fontGroupCombined | fontGroupSeparate
+        fontTable = (leftBracket + fontTableControl +
+            OneOrMore(font).setResultsName('fonts') +
+            rightBracket)
 
         # assemble the grammar
-        self.rtfDoc = (leftBracket + rtfVersion + charSet +
+        self.rtfDoc = (leftBracket + rtfVersion + charSet + codePage +
             OneOrMore(rtfControl) +
-            Optional(fontTable) +
+            fontTable +
             #OneOrMore(rtfGroup) +
             rightBracket
             )
+
+    def getGrammar(self):
+        return self.rtfDoc
 
 class RTFParser(object):
 

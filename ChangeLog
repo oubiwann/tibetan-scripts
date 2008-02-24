@@ -1,3 +1,7 @@
+2008.02.24
+
+* Added support for v1.2+ font tables.
+
 2008.02.23
 
 * Added stubbs and doctests for some util functions and added them to test
