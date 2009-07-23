@@ -1,28 +1,25 @@
-svn diff ChangeLog | \
-    egrep '^\+' | \
-    sed -e 's/^\+//g'| \
-    egrep -v '^\+\+ ChangeLog' > commit-msg
+. ./admin/defs.sh
+
+getDiff ChangeLog > $MSG
 echo "Committing with this message:"
-cat commit-msg
+cat $MSG
 echo
-if [[ "$1" == 'run_tests' ]];then
-    python tests/test_all.py &> test.out
-else
+if [[ "$1" == "$FLAG" ]];then
     echo 'OK' > test.out
+else
+    # send the output (stdout and stderr) to both a file for checking and
+    # stdout for immediate viewing/feedback purposes
+    python test/test_all.py 2>&1|tee test.out
+    ./admin/checkBuild.sh || error
 fi
 STATUS=`tail -1 test.out|awk '{print $1}'`
-if [[ "$STATUS" == 'OK' ]];then
-    rm test.out
-    if [[ "$1" == 'run_tests' ]];then
-        echo "All tests passed."
-    else
+if [[ "$STATUS" == "OK" ]];then
+    if [[ "$1" == "FLAG" ]];then
         echo "Skipping tests..."
+    else
+        echo "All tests passed."
     fi
-    echo "Committing to Subversion now..."
-    svn commit --file commit-msg && \
-        rm commit-msg || \
-        echo "There was an error committing; message preserved."
+    localCommit && cleanup || error
 else
-    echo "*** Commit aborting! Test suite failed ***"
-    cat test.out
+    abort
 fi

@@ -1,3 +1,14 @@
+2009.07.23
+
+* Added more admin scripts.
+
+2009.07.21
+
+* Added a docs file for dev notes.
+* Moved the notes file into docs and renamed it.
+* Added a third-party subdir with rtedit in it.
+* Added missing init file in rdedit package.
+
 2008.02.24
 
 * Added support for v1.2+ font tables.
