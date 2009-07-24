@@ -49,7 +49,7 @@ function pushLaunchpad {
 
 function pushSubversion {
     echo "Pushing to SourceForge.net (Subversion) now ..."
-    cd $BASE_DIR
+    #cd $BASE_DIR
     bzr push $SVN
 }
 

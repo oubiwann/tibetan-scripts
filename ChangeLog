@@ -5,6 +5,7 @@
 http://www.digitaltibetan.org/cgi-bin/phonetics.pl to upper-case
 transliteration.
 * Updated admin script to use a different patch for pushing to sf.net svn repo.
+* Tweaked admin script.
 
 2009.07.21
 
