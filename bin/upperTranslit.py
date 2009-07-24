@@ -18,7 +18,10 @@ def main(filename):
         "-",
         ]
     output = Popen(command, stdout=PIPE).communicate()[0]
-    print output.decode("utf-8").upper()
+    for line in output.decode("utf-8").upper().split("\n"):
+        if len(line) > 0:
+            line = "%s /  " % line
+        print line
 
 
 if __name__ == "__main__":
