@@ -7,13 +7,18 @@ Usage:
 where the unicode file contains lower-case Tibetan transliteration text.
 """
 import sys
-
+from subprocess import Popen, PIPE
 
 def main(filename):
-    fh = open(filename)
-    data = fh.read()
-    fh.close()
-    print data.decode("utf-8").upper()
+    command = [
+        "perl",
+        "third-party/Lingua-BO-Wylie-dev/bin/pronounce.pl", 
+        "-j", "' '",
+        filename,
+        "-",
+        ]
+    output = Popen(command, stdout=PIPE).communicate()[0]
+    print output.decode("utf-8").upper()
 
 
 if __name__ == "__main__":

@@ -6,6 +6,9 @@ http://www.digitaltibetan.org/cgi-bin/phonetics.pl to upper-case
 transliteration.
 * Updated admin script to use a different patch for pushing to sf.net svn repo.
 * Tweaked admin script.
+* Added Wylie/transliteration perl code from www.digitaltibetan.org.
+* Updated the transliteration script to use the perl, thus obviating the need
+to use the web interface to get the lower-case transliterated text.
 
 2009.07.21
 
