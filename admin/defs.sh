@@ -1,8 +1,9 @@
 LIB=pecha
 NAME=PechaCreation
 EGG_NAME=$NAME
+BASE_DIR='../../'
 BZR='lp:~oubiwann/adytum-collection/Projects'
-SVN='svn+https://adytum.svn.sourceforge.net/svnroot/adytum/Projects/PechaCreation/trunk'
+SVN='svn+https://adytum.svn.sourceforge.net/svnroot/adytum/Projects'
 FLAG='skip_tests'
 MSG=commit-msg
 export PYTHONPATH=.:./test:$PYTHONPATH
@@ -41,12 +42,14 @@ function pushSucceed {
 
 function pushLaunchpad {
     echo "Pushing to Launchpad now ($BZR) ..."
+    cd $BASE_DIR
     bzr push $BZR && pushSucceed
     cleanup
 }
 
-function pushGoogle {
-    echo "Pushing to Google Code (Subversion) now ..."
+function pushSubversion {
+    echo "Pushing to SourceForge.net (Subversion) now ..."
+    cd $BASE_DIR
     bzr push $SVN
 }
 
