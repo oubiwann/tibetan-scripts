@@ -1,6 +1,8 @@
 2009.07.24
 
-* Added line markers to transliteration ouput.
+* Added line markers to transliteration output.
+* Added a debug option for the transliteration script, including line numbers
+and run report.
 
 2009.07.23
 
