@@ -23,7 +23,7 @@ Tibetan text.
 
 =head1 DESCRIPTION
 
-This module creates approximate phonetics for Tibetan text, according to 
+This module creates approximate phonetics for Tibetan text, according to
 THL Simplified Phonemic Transcription.
 
 See L<http://www.thlib.org/reference/transliteration/#essay=/thl/phonetics/>
@@ -36,10 +36,10 @@ our $VERSION = '0.0020090210';
 our @EXPORT_OK = ();
 our @EXPORT = ();
 
-use fields qw/print_warnings 
-		middle_suffix middle_nasals join_words zh_is_shy l_umlauts
-		exceptions_file words_file  
-		_exceptions _words _warns _wl/;
+use fields qw/print_warnings
+        middle_suffix middle_nasals join_words zh_is_shy l_umlauts
+        exceptions_file words_file
+        _exceptions _words _warns _wl/;
 
 ### Various constants and hashes for Tibetan phonetics
 
@@ -47,17 +47,17 @@ use fields qw/print_warnings
 our (%tib_top, %suffixes, %tib_stacks);
 *tib_top = \%Lingua::BO::Wylie::tib_top;
 *suffixes = \%Lingua::BO::Wylie::suffixes;
-*tib_stacks = \%Lingua::BO::Wylie::tib_stacks; 
+*tib_stacks = \%Lingua::BO::Wylie::tib_stacks;
 
 # how many tsekbars per word max, for word splitting?
-use constant MAX_WORD_LENGTH	=> 3;
+use constant MAX_WORD_LENGTH    => 3;
 
 # superscript => { letter or stack below => 1 }
 # (not copied from Wylie.pm b/c of different handling of "lh")
 my %superscripts = (
-  r	=> { map { $_ => 1 } qw/k g ng j ny t d n b m ts dz k+y g+y m+y b+w ts+w g+w/ },
-  l	=> { map { $_ => 1 } qw/k g ng c j t d p b/ },
-  s	=> { map { $_ => 1 } qw/k g ng ny t d n p b m ts k+y g+y p+y b+y m+y k+r g+r p+r b+r m+r n+r/ },
+  r    => { map { $_ => 1 } qw/k g ng j ny t d n b m ts dz k+y g+y m+y b+w ts+w g+w/ },
+  l    => { map { $_ => 1 } qw/k g ng c j t d p b/ },
+  s    => { map { $_ => 1 } qw/k g ng ny t d n p b m ts k+y g+y p+y b+y m+y k+r g+r p+r b+r m+r n+r/ },
 );
 
 # umlauting suffixes
@@ -65,76 +65,76 @@ my %suffix_umlaut = map { $_ => 1 } qw /d n l s/;
 
 # pronounciation of suffixes
 my %pronounce_suffix = (
-  g	=> "k",
-  b	=> "p",
-  d	=> "",
-  s	=> "",
-  "'"	=> "",
+  g    => "k",
+  b    => "p",
+  d    => "",
+  s    => "",
+  "'"  => "",
 );
 
 # pronounciation of main consonants (when different from wylie)
 my %pronounce_consonant = (
-  c	=> "ch",
-  th	=> "t",
-  ph	=> "p",
-  tsh	=> "ts",
-  "'"	=> "",
-  a	=> "",
-  zh	=> '$zh',		# later changed to either "zh" or "shya" based on options
+  c    => "ch",
+  th   => "t",
+  ph   => "p",
+  tsh  => "ts",
+  "'"  => "",
+  a    => "",
+  zh   => '$zh',        # later changed to either "zh" or "shya" based on options
 );
 
 # pronounciation of umlauts
 my %pronounce_umlaut = (
-  a	=> "e",
-  o	=> "\x{f6}",		# o umlaut
-  u	=> "\x{fc}",		# u umlaut
+  a    => "e",
+  o    => "\x{f6}",        # o umlaut
+  u    => "\x{fc}",        # u umlaut
 );
 
 # consonant clusters that change pronounciation
 my %clusters = (
-  py	=> "ch",
-  phy	=> "ch",
-  by	=> "j",
-  my	=> "ny",
-  kr	=> "tr",
-  pr	=> "tr",
-  tr	=> "tr",
-  khr	=> "tr",
-  phr	=> "tr",
-  thr	=> "tr",
-  gr	=> "dr",
-  br	=> "dr",
-  dr	=> "dr",
-  nr	=> "n",
-  mr	=> "m",
-  sr	=> "s",
-  kl	=> "l",
-  gl	=> "l",
-  bl	=> "l",
-  rl	=> "l",
-  sl	=> "l",
-  zl	=> "d",
+  py   => "ch",
+  phy  => "ch",
+  by   => "j",
+  my   => "ny",
+  kr   => "tr",
+  pr   => "tr",
+  tr   => "tr",
+  khr  => "tr",
+  phr  => "tr",
+  thr  => "tr",
+  gr   => "dr",
+  br   => "dr",
+  dr   => "dr",
+  nr   => "n",
+  mr   => "m",
+  sr   => "s",
+  kl   => "l",
+  gl   => "l",
+  bl   => "l",
+  rl   => "l",
+  sl   => "l",
+  zl   => "d",
 );
 
 # Defaults for creating a new Lingua::BO::Phonetics object.
 my %defaults = (
-  print_warnings	=> 1,
-  middle_suffix		=> 1,	 # strict THL: 0
-  middle_nasals		=> 1,
-  join_words		=> 1,
-  l_umlauts		=> 1,
-  zh_is_shy		=> 0,
-  exceptions_file	=> _my_dir_file("exceptions.txt"),
-  words_file		=> _my_dir_file("word_list.txt"),
+  print_warnings  => 1,
+  middle_suffix   => 1,     # strict THL: 0
+  middle_nasals   => 1,
+  join_words      => 1,
+  l_umlauts       => 1,
+  zh_is_shy       => 0,
+  exceptions_file => _my_dir_file("exceptions.txt"),
+  words_file      => _my_dir_file("word_list.txt"),
 );
 
 =head1 METHODS
 
 =head2 CONSTRUCTOR: new (%args)
 
-To create a new Lingua::BO::Phonetics object, use the B<new> class method.  
+To create a new Lingua::BO::Phonetics object, use the B<new> class method.
 
-All arguments are optional; arguments include: 
+All arguments are optional; arguments include:
 
 =over 4
 
@@ -189,7 +189,7 @@ sub new {
 
   # load the words for word splitting
   if (defined $self->{words_file}) {
-    open WO, "<:utf8", $self->{words_file} 
+    open WO, "<:utf8", $self->{words_file}
       or croak "Cannot open word list $self->{words_file}: $!";
 
     while (my $l = <WO>) {
@@ -201,7 +201,7 @@ sub new {
 
   # ... and load the exceptions
   if (defined $self->{exceptions_file}) {
-    open EX, "<:utf8", $self->{exceptions_file} 
+    open EX, "<:utf8", $self->{exceptions_file}
       or croak "Cannot open exceptions file $self->{exceptions_file}: $!";
 
     while (my $l = <EX>) {
@@ -231,7 +231,7 @@ sub get_warnings {
 
 =head2 phonetics ($string, %args)
 
-Creates Tibetan phonetics.  
+Creates Tibetan phonetics.
 
 $string can be either Unicode or Wylie; it will be converted from Wylie if it
 doesn't include any main characters from the Tibetan Unicode set, and has
@@ -258,7 +258,7 @@ Tibetan in Wylie with words separated with "/" looks like this:
 
 =item * autosplit
 
-Automatically split into words using a built-in word list.  This is incompatible 
+Automatically split into words using a built-in word list.  This is incompatible
 with both joiner and separator.
 
 =back
@@ -314,8 +314,8 @@ ITER:
       push @out, $t;
 
       if ($t eq "\r" && ($tokens[$i] || '') eq "\n") {
-	$i++;
-	push @out, "\n";
+    $i++;
+    push @out, "\n";
       }
       next ITER;
     }
@@ -336,24 +336,24 @@ ITER:
 
     my @tsek_bars = ();
 
-    # split into as many successive tsekbars as we can find, separated by single 
-    # non-breaking tseg only (i.e candidates for being a single word)
+    # split into as many successive tsekbars as we can find, separated by
+    # single non-breaking tseg only (i.e candidates for being a single word)
     TSEKS: while (defined($t = $tokens[$i]) && $tib_top{$t}) {
 
       ($toks, $out, $warns, $stacks) = $self->{_wl}->_to_wylie_one_tsekbar(\@tokens, $i);
       $i += $toks;
       $units++;
       foreach my $w (@$warns) {
-	$self->_warn(qq{line $line: $w});
+        $self->_warn(qq{line $line: $w});
       }
       push @tsek_bars, {
-	stacks	=> $stacks,
-	wylie	=> $out,
+        stacks => $stacks,
+        wylie  => $out,
       };
 
-      # skip a non-breaking tsek 
+      # skip a non-breaking tsek
       if (($t = $tokens[$i]) && $t eq "\x{f0c}") {
-	$i++;
+        $i++;
       }
     }
 
@@ -361,19 +361,20 @@ ITER:
     my $j = 0;
     while ($j <= $#tsek_bars) {
 
-      # group into words using the automatic splitter, or just take it all together
-      my $grab = $autosplit ? 
-		    $self->_find_word(\@tsek_bars, $j) :
-		    scalar(@tsek_bars);
+      # group into words using the automatic splitter, or just take it all
+      # together
+      my $grab = $autosplit ?
+        $self->_find_word(\@tsek_bars, $j):
+        scalar(@tsek_bars);
 
-      my @process = @tsek_bars[$j .. $j + $grab - 1];
-      $j += $grab;
+        my @process = @tsek_bars[$j .. $j + $grab - 1];
+        $j += $grab;
 
-      my ($pron, $warns) = $self->_pronounce_processed_word(\@process);
-      push @out, $pron, ' ';
-      foreach my $w (@$warns) {
-	$self->_warn(qq{line $line: $w});
-      }
+        my ($pron, $warns) = $self->_pronounce_processed_word(\@process);
+        push @out, $pron, ' ';
+        foreach my $w (@$warns) {
+          $self->_warn(qq{line $line: $w});
+        }
     }
   }
 
@@ -416,14 +417,14 @@ sub _prepare_string {
 
     if (defined($joiner)) {
       unless ($joiner eq '*') {
-	$str =~ s/\*/ /g;
-	$str =~ s/\Q$joiner\E/\*/g;
+    $str =~ s/\*/ /g;
+    $str =~ s/\Q$joiner\E/\*/g;
       }
 
     } elsif (defined $separator) {
       unless ($separator eq ' ') {
-	$str =~ s/ /\*/g;
-	$str =~ s/\Q$separator\E/ /g;
+    $str =~ s/ /\*/g;
+    $str =~ s/\Q$separator\E/ /g;
       }
 
     } elsif ($autosplit) {
@@ -443,19 +444,19 @@ sub _prepare_string {
 
     if (defined($joiner)) {
       unless ($joiner eq "\x{f0c}") {
-	$str =~ s/\x{f0c}/\x{f0b}/g;
-	$str =~ s/\Q$joiner\E/\x{f0c}/g;
+    $str =~ s/\x{f0c}/\x{f0b}/g;
+    $str =~ s/\Q$joiner\E/\x{f0c}/g;
       }
 
     } elsif (defined $separator) {
       unless ($separator eq "\x{f0b}") {
-	$str =~ s/\x{f0b}/\x{f0c}/g;
-	$str =~ s/\Q$separator\E/\x{f0b}/g;
+    $str =~ s/\x{f0b}/\x{f0c}/g;
+    $str =~ s/\Q$separator\E/\x{f0b}/g;
       }
 
     } elsif ($autosplit) {
       $str =~ s/\x{f0b}/\x{f0c}/g;
-    
+
     } else {
       $str =~ s/\x{f0c}/\x{f0b}/g;
     }
@@ -464,13 +465,14 @@ sub _prepare_string {
   return ($str, \@warns);
 }
 
-# Find out how many tsekbars should we grab together to form a word, using a greedy
-# algorithm.
+# Find out how many tsekbars should we grab together to form a word, using a
+# greedy algorithm.
 
 sub _find_word {
   my ($self, $tsek_bars, $start) = @_;
 
-  # how many tsekbars can we grab at most?  our word list has max 3 tsekbars per word
+  # how many tsekbars can we grab at most?  our word list has max 3 tsekbars
+  # per word
   my $grab = scalar(@$tsek_bars) - $start;
   $grab = MAX_WORD_LENGTH if $grab > MAX_WORD_LENGTH;
 
@@ -481,8 +483,9 @@ TRY:
     my $word = join ' ', map { $_->{wylie} } @$tsek_bars[$start .. $start + $grab - 1];
     last TRY if $self->{_words}{$word};
 
-    # or is it a derived word?  
-    # ex. 'khor 'ba'i, 'khor 'bas, 'khor ba'am, 'khor ba'ang, 'khor ba'o, 'khor bar
+    # or is it a derived word?
+    # ex. 'khor 'ba'i, 'khor 'bas, 'khor ba'am, 'khor ba'ang, 'khor ba'o, 'khor
+    # bar
     if ($word =~ s/([aeiou])(?:\'i|s|'am|'ang|'o|r)$/$1/) {
       last TRY if $self->{_words}{$word};
       last TRY if $self->{_words}{$word . "'"};
@@ -492,11 +495,12 @@ TRY:
   $grab;
 }
 
-# Check for a standard tibetan syllable, comprised of one main stack (w/ prefixes & suffixes
-# as appropriate), optionally followed by up to two stacks with an a-chung, an optional 
-# vowel, and possibly a suffix on the last one.
-# 
-# At this point, prefixes & suffixes have been merged into the stack they attach to.
+# Check for a standard tibetan syllable, comprised of one main stack (w/
+# prefixes & suffixes as appropriate), optionally followed by up to two stacks
+# with an a-chung, an optional vowel, and possibly a suffix on the last one.
+#
+# At this point, prefixes & suffixes have been merged into the stack they
+# attach to.
 
 sub _check_standard {
   my ($self, $stacks) = @_;
@@ -504,7 +508,7 @@ sub _check_standard {
   # at most 3 stacks
   return undef if scalar(@$stacks) > 3;
 
-  # check the stack on the 1st one 
+  # check the stack on the 1st one
   my $st1 = join '+', @{ $stacks->[0]{stack} };
   return undef if $st1 =~ /\+/ && !$tib_stacks{$st1};
 
@@ -513,7 +517,8 @@ sub _check_standard {
     return undef if scalar(@{ $s->{vowels} }) > 1;
   }
 
-  # no visargas, anusvaras or halantas on non-final stacks; no halantas at the end either
+  # no visargas, anusvaras or halantas on non-final stacks; no halantas at the
+  # end either
   foreach my $s (@$stacks[0 .. $#$stacks - 1]) {
     return undef if $s->{finals_found}{M} || $s->{finals_found}{H} || $s->{finals_found}{"?"};
   }
@@ -524,7 +529,7 @@ sub _check_standard {
     return undef unless scalar(@{ $s->{stack} }) == 1 && $s->{stack}[0] eq "'" && !$s->{has_suffix};
   }
 
-  # only achung-vowels + optional suffix at the end 
+  # only achung-vowels + optional suffix at the end
   if (scalar(@$stacks) > 1) {
     my $s = $stacks->[$#$stacks];
     return undef unless scalar(@{ $s->{stack} }) == 1 && $s->{stack}[0] eq "'";
@@ -563,8 +568,8 @@ sub _cleanup_unicode {
   $str;
 }
 
-# Create the phonetics for a single Tibetan word, given as a set of analyzed tsekbars.
-
+# Create the phonetics for a single Tibetan word, given as a set of analyzed
+# tsekbars.
 sub _pronounce_processed_word {
   my ($self, $tsek_bars) = @_;
   my $i = 0;
@@ -582,8 +587,8 @@ sub _pronounce_processed_word {
   }
 
   # or is it a derived word?  manually do derivations from the exceptions list.
-  if ($wylie =~ s/([aeiou])(\'i|s|'am|'ang|'o|r)$/$1/ && 
-      defined($self->{_exceptions}{$wylie})) 
+  if ($wylie =~ s/([aeiou])(\'i|s|'am|'ang|'o|r)$/$1/ &&
+      defined($self->{_exceptions}{$wylie}))
   {
     my $add = $2;
     my $pron = $self->{_exceptions}{$wylie};
@@ -608,15 +613,16 @@ sub _pronounce_processed_word {
   for ($i = 0; $i <= $#$tsek_bars; $i++) {
     my $stacks = $tsek_bars->[$i]{stacks};
 
-    # drop the prefix as a separate unit, but keep track of it in the main stack
+    # drop the prefix as a separate unit, but keep track of it in the main
+    # stack
     if ($stacks->[0]{prefix}) {
       $stacks->[1]{has_prefix} = $stacks->[0]{single_cons};
       shift @$stacks;
     }
 
-    # optional: also allow the 2nd to be a suffix if a full stack comes after it
-    # (ex. "bzhugso")
-    if ($self->{middle_suffix} && 
+    # optional: also allow the 2nd to be a suffix if a full stack comes after
+    # it (ex. "bzhugso")
+    if ($self->{middle_suffix} &&
         scalar(@$stacks) >= 3 &&
         !$stacks->[1]{suffix} && !$stacks->[2]{suffix} &&
         $stacks->[1]{single_cons} &&
@@ -625,7 +631,8 @@ sub _pronounce_processed_word {
       $stacks->[1]{middle_suffix} = 1;
     }
 
-    # drop the suffix & 2nd suffix as a separate unit, but keep track of the suffix
+    # drop the suffix & 2nd suffix as a separate unit, but keep track of the
+    # suffix
     if ($stacks->[$#$stacks]{suff2}) {
       pop @$stacks;
     }
@@ -636,18 +643,19 @@ sub _pronounce_processed_word {
       my $s = $stacks->[$#$stacks];
 
       # devoice the suffix, keep track of umlauting
-      $s->{has_umlaut} = $suff 
+      $s->{has_umlaut} = $suff
         if $suffix_umlaut{$suff} && ($suff ne 'l' || $self->{l_umlauts});
       $suff = defined($pronounce_suffix{$suff}) ? $pronounce_suffix{$suff} : $suff;
       $stacks->[$#$stacks]{has_suffix} = $suff if $suff ne '';
     }
 
-    # remove 'i as a separate final stack, but set the previous stack for umlauting
+    # remove 'i as a separate final stack, but set the previous stack for
+    # umlauting
     if (scalar(@$stacks) > 1 &&
         $stacks->[$#$stacks]{cons_str} eq "'" &&
         scalar(@{ $stacks->[$#$stacks]{vowels} }) == 1 &&
         $stacks->[$#$stacks]{vowels}[0] eq 'i' &&
-	!@{ $stacks->[$#$stacks]{finals} })
+    !@{ $stacks->[$#$stacks]{finals} })
     {
       pop @$stacks;
       $stacks->[$#$stacks]{has_umlaut} = "'i";
@@ -672,45 +680,47 @@ sub _pronounce_processed_word {
         my $first = $c[0];
         my $rest  = join '+', @c[1..$#c];
         if ($superscripts{$first}{$rest}) {
-	  $s->{has_superscripts} = $first;
-	  shift @c;
-	}
+      $s->{has_superscripts} = $first;
+      shift @c;
+    }
       }
 
-      # special rules for dba => wa, dbo => wo, dbya => ya, dbra => ra, dbu => u...
+      # special rules for dba => wa, dbo => wo, dbya => ya, dbra => ra,
+      # dbu => u...
       if ($s->{has_prefix} && $s->{has_prefix} eq 'd' && $c[0] eq 'b') {
         if ((@{ $s->{vowels} } && $s->{vowels}[0] eq 'u') ||
-	    ($c[1] && ($c[1] eq 'y' || $c[1] eq 'r')))
-	{
-	  shift @c;
-	} else {
-	  $c[0] = "w";
-	}
+        ($c[1] && ($c[1] eq 'y' || $c[1] eq 'r')))
+    {
+      shift @c;
+    } else {
+      $c[0] = "w";
+    }
       }
 
-      # change ba => wa, bo => wo in the 2nd and further tsekbars; also with "-r" suffix
+      # change ba => wa, bo => wo in the 2nd and further tsekbars; also
+      # with "-r" suffix
       if ($standard_syllable && $i > 0 &&
           !$s->{has_prefix} && $s->{cons_str} eq 'b' &&
           (!@{ $s->{vowels} } || $s->{vowels}[0] =~ /a|o/) &&
-	  $c[0] eq "b" &&
-	  (!$s->{has_suffix} || $s->{has_suffix} eq 'r'))
+      $c[0] eq "b" &&
+      (!$s->{has_suffix} || $s->{has_suffix} eq 'r'))
       {
         $c[0] = "w";
       }
-	  
+
 
       # consonant clusters: phya => cha, etc
       if (scalar(@c) > 1) {
         my $cc = join '', @c[0, 1];
-	if ($clusters{$cc}) {
-	  splice @c, 0, 2, $clusters{$cc};
-	}
+    if ($clusters{$cc}) {
+      splice @c, 0, 2, $clusters{$cc};
+    }
       }
 
       # fix consonant pronounciation
       @c = grep { $_ ne '' }
            map { defined($pronounce_consonant{$_}) ? $pronounce_consonant{$_} : lc $_ }
-	   @c;
+       @c;
 
       # put it back, without plusses
       $s->{cons_pronounce} = join '', @c;
@@ -719,26 +729,26 @@ sub _pronounce_processed_word {
       if ($self->{middle_nasals} && $#$stacks == 0 && $#$tsek_bars > $i) {
         my $next = $tsek_bars->[$i + 1];
 
-	# 1) a-chung prefix produces a nasal suffix in the prev syllable
-	if ($next->{stacks}[0]{prefix} && $next->{stacks}[0]{single_cons} eq "'") {
-	  my $cons = $next->{stacks}[1]{cons_str};
-	  if ($cons eq "b" || $cons eq "ph") {
-	    $s->{has_suffix} = "m";
-	  } else {
-	    $s->{has_suffix} = "n";
-	  }
+    # 1) a-chung prefix produces a nasal suffix in the prev syllable
+    if ($next->{stacks}[0]{prefix} && $next->{stacks}[0]{single_cons} eq "'") {
+      my $cons = $next->{stacks}[1]{cons_str};
+      if ($cons eq "b" || $cons eq "ph") {
+        $s->{has_suffix} = "m";
+      } else {
+        $s->{has_suffix} = "n";
+      }
 
-	# 2) m prefix produces an m suffix, unless there was already a nasal suffix
-	} elsif ($next->{stacks}[0]{prefix} && $next->{stacks}[0]{single_cons} eq 'm') {
-	  $s->{has_suffix} = 'm'
-	    unless $s->{has_suffix} && $s->{has_suffix} =~ /^(?:m|n|ng)$/;
+    # 2) m prefix produces an m suffix, unless there was already a nasal suffix
+    } elsif ($next->{stacks}[0]{prefix} && $next->{stacks}[0]{single_cons} eq 'm') {
+      $s->{has_suffix} = 'm'
+        unless $s->{has_suffix} && $s->{has_suffix} =~ /^(?:m|n|ng)$/;
 
-	# 3) l superscript in ld, lt, lj produces an n suffix.  same with zl.
-	} elsif ($next->{stacks}[0]{cons_str} =~ /^l\+(?:d|t|j)(?:\+|$)/ ||
-		 $next->{stacks}[0]{cons_str} =~ /^z\+l(?:\+|$)/) {
-	  $s->{has_suffix} = 'n'
-	    unless $s->{has_suffix} && $s->{has_suffix} =~ /^(?:m|n|ng)$/;
-	}
+    # 3) l superscript in ld, lt, lj produces an n suffix.  same with zl.
+    } elsif ($next->{stacks}[0]{cons_str} =~ /^l\+(?:d|t|j)(?:\+|$)/ ||
+         $next->{stacks}[0]{cons_str} =~ /^z\+l(?:\+|$)/) {
+      $s->{has_suffix} = 'n'
+        unless $s->{has_suffix} && $s->{has_suffix} =~ /^(?:m|n|ng)$/;
+    }
 
       }
 
@@ -748,7 +758,7 @@ sub _pronounce_processed_word {
         $s->{vowel_pronounce} = $pronounce_umlaut{ $s->{vowel_pronounce} } || $s->{vowel_pronounce};
       }
       $s->{vowel_pronounce} = '' if $s->{middle_suffix};
-      
+
       # finals?
       if (grep { /M/ } @{ $s->{finals} }) {
         $s->{final_pronounce} = 'm';
@@ -782,7 +792,7 @@ sub _pronounce_processed_word {
   $out =~ s/ngg/ng/g;
 
   # put accents on final "e"
-  $out =~ s/e($|\()/\x{e9}$1/; 
+  $out =~ s/e($|\()/\x{e9}$1/;
 
   # fix "$zh" => zh or shy
   if ($self->{zh_is_shy}) {
@@ -790,12 +800,10 @@ sub _pronounce_processed_word {
   } else {
     $out =~ s/\$//g;
   }
-
   return ($out, \@warns);
 }
 
 # Generate a warning.  Prints it if required.
-
 sub _warn {
   my ($self, $warn) = @_;
 
@@ -818,4 +826,3 @@ it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
 
 =cut
-
