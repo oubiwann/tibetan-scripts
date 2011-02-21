@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Convert a lower-case transliterated file to an upper-case transliterated file.
 
