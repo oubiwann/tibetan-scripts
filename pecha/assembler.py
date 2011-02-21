@@ -18,15 +18,6 @@ pechaShortWidth = 11 * inch
 pechaLongWidth = 14 * inch
 
 
-def _prepFiles(inFilename, outFilename):
-    """
-    """
-    source = PdfFileReader(file(inFilename, "rb"))
-    outPDF = PdfFileWriter()
-    outStream = open(outFilename, "wb")
-    return (source, outPDF, outStream)
-
-
 def _invertBoxParams(params):
     """
     """
@@ -97,17 +88,17 @@ def createMarkedPDF(filenameOrFH, opts):
         if opts.drawBottomCrop:
             boxParamsBot = _invertBoxParams(boxParamsBot)
     # now create the PDF page
-    c = Canvas(filenameOrFH, pagesize=landscape(opts.paperSize))
-    c.setStrokeColorRGB(*opts.shade)
-    c.setFillColorRGB(*opts.shade)
-    c.rect(*[inch*x for x in boxParamsMid], **{'fill': 1})
+    canvas = Canvas(filenameOrFH, pagesize=landscape(opts.paperSize))
+    canvas.setStrokeColorRGB(*opts.shade)
+    canvas.setFillColorRGB(*opts.shade)
+    canvas.rect(*[inch*x for x in boxParamsMid], **{'fill': 1})
     if opts.drawTopCrop:
-        c.rect(*[inch*x for x in boxParamsTop], **{'fill': 1})
+        canvas.rect(*[inch*x for x in boxParamsTop], **{'fill': 1})
     if opts.drawBottomCrop:
-        c.rect(*[inch*x for x in boxParamsBot], **{'fill': 1})
-    c.showPage()
-    c.save()
-    return (filenameOrFH, c)
+        canvas.rect(*[inch*x for x in boxParamsBot], **{'fill': 1})
+    canvas.showPage()
+    canvas.save()
+    return (filenameOrFH, canvas)
 
 
 def createBlankPDF(filenameOrFH, opts):
@@ -120,59 +111,68 @@ def createBlankPDF(filenameOrFH, opts):
     return (filenameOrFH, c)
 
 
+def _prepFiles(inFilename, outFilename):
+    """
+    """
+    reader = PdfFileReader(file(inFilename, "rb"))
+    writer = PdfFileWriter()
+    stream = open(outFilename, "wb")
+    return (reader, writer, stream)
+
+
 def addCropMarks(inFilename, outFilename, opts):
     """
     """
     # setup color and sizes
     opts.shade = [float(opts.shade)] * 3
     opts.paperSize = getattr(pagesizes, opts.paperSize)
-    crop, canvas = createMarkedPDF(StringIO(), opts)
-    markPage = PdfFileReader(crop).getPage(0)
-    source, output, marked = _prepFiles(inFilename, outFilename)
-    for index in xrange(source.getNumPages()):
-        page = source.getPage(index)
+    fileObj, canvas = createMarkedPDF(StringIO(), opts)
+    markPage = PdfFileReader(fileObj).getPage(0)
+    reader, writer, marked = _prepFiles(inFilename, outFilename)
+    for index in xrange(reader.getNumPages()):
+        page = reader.getPage(index)
         page.mergePage(markPage)
-        output.addPage(page)
-    output.write(marked)
+        writer.addPage(page)
+    writer.write(marked)
     marked.close()
-    crop.close()
+    fileObj.close()
 
 
-def _doublePages(source):
-    duplicated = PdfFileWriter()
-    for index in xrange(source.getNumPages()):
-        page = source.getPage(index)
-        duplicated.addPage(page)
+def _doublePages(reader):
+    writer = PdfFileWriter()
+    for index in xrange(reader.getNumPages()):
+        page = reader.getPage(index)
+        writer.addPage(page)
         # If we don't copy, then the later operations will execute against
         # both, leaving us with all even or all odd pecha pages, depending on
         # which is worked on first (or last?).
-        duplicated.addPage(copy(page))
-    return duplicated
+        writer.addPage(copy(page))
+    return writer
 
 
-def _cropOddPechaPage(source, index, opts):
+def _cropOddPechaPage(reader, index, opts):
     """
     The following does the top of the pecha page (odd pecha pages)
     """
     params = (
-        source.getPage(index), 
+        reader.getPage(index), 
         0, 0,
         float(opts.paperSize[1]), float(opts.paperSize[0])/2)
     return cropPDFPage(*params)
 
 
-def _cropEvenPechaPage(source, index, opts):
+def _cropEvenPechaPage(reader, index, opts):
     """
     The following does the bottom of the pecha page (even pecha pages)
     """
     params = (
-        source.getPage(index), 
+        reader.getPage(index), 
         0, pechaHeight,
         float(opts.paperSize[1]), float(opts.paperSize[0]))
     return cropPDFPage(*params)
 
 
-def _crop2PerPage(source, output, opts):
+def _crop2PerPage(reader, writer, opts):
     """
     Double the pages, since one page has two pecha pages on it, and we'll
     need to crop it twice to get all the pecha pages (crop to the top to get
@@ -183,48 +183,48 @@ def _crop2PerPage(source, output, opts):
     media box, etc. There are some readers that don't, so you could get some
     strange-looking, duplicate pages with those readers.
     """
-    source = _doublePages(source)
-    for index in xrange(source.getNumPages()):
+    reader = _doublePages(reader)
+    for index in xrange(reader.getNumPages()):
         if index % 2 == 0:
-            page = _cropOddPechaPage(source, index, opts)
+            page = _cropOddPechaPage(reader, index, opts)
         else:
-            page = _cropEvenPechaPage(source, index, opts)
-        output.insertPage(page, index)
-    return output
+            page = _cropEvenPechaPage(reader, index, opts)
+        writer.insertPage(page, index)
+    return writer
 
 
-def _crop1PerPage(source, output, opts):
-    for index in xrange(source.getNumPages()):
-        page = _cropOddPechaPage(source, index, opts)
-        output.addPage(page)
-    return output
+def _crop1PerPage(reader, writer, opts):
+    for index in xrange(reader.getNumPages()):
+        page = _cropOddPechaPage(reader, index, opts)
+        writer.addPage(page)
+    return writer
 
 
 def cropPDFFile(inFilename, outFilename, opts=None):
     """
     """
     opts.paperSize = getattr(pagesizes, opts.paperSize)
-    source, output, cropped = _prepFiles(inFilename, outFilename)
+    reader, writer, stream = _prepFiles(inFilename, outFilename)
     if opts.pechaPagesPerPage == 2:
-        output = _crop2PerPage(source, output, opts)
+        writer = _crop2PerPage(reader, writer, opts)
     elif opts.pechaPagesPerPage == 1:
-        output = _crop1PerPage(source, output, opts)
-    output.write(cropped)
-    cropped.close()
+        writer = _crop1PerPage(reader, writer, opts)
+    writer.write(stream)
+    stream.close()
 
 
 def cropAndRotateFile(inFilename, outFilename, opts=None):
     """
     """
-    source, output, cropped = _prepFiles(inFilename, outFilename)
-    pf = booklet.pechaFactory(source.getNumPages())
+    reader, writer, stream = _prepFiles(inFilename, outFilename)
+    pf = booklet.pechaFactory(reader.getNumPages())
     for index, block in enumerate(pf.getBlockList()):
-        page = cropPDFPage(source.getPage(index))
+        page = cropPDFPage(reader.getPage(index))
         if block.orientation == UPSIDEDOWN:
             page.rotateClockwise(180)
-        output.addPage(page)
-    output.write(cropped)
-    cropped.close()
+        writer.addPage(page)
+    writer.write(stream)
+    stream.close()
 
 
 def assembleBooklet(inFilename, outFilename, opts):
@@ -232,22 +232,22 @@ def assembleBooklet(inFilename, outFilename, opts):
     """
     opts.paperSize = getattr(pagesizes, opts.paperSize)
     blank, canvas = createBlankPDF(StringIO(), opts)
-    source, output, assembled = _prepFiles(inFilename, outFilename)
-    pf = booklet.pechaFactory(source.getNumPages())
+    reader, writer, stream = _prepFiles(inFilename, outFilename)
+    pf = booklet.pechaFactory(reader.getNumPages())
     for sheet in pf.sheets:
         page = side = None
         for block in sheet.blocks:
             if side != block.side:
                 if page != None:
                     # finish up the old page
-                    output.addPage(page)
+                    writer.addPage(page)
                 # make new PDF page
                 page = PdfFileReader(blank).getPage(0)
             side = block.side
-            blockPDF = source.getPage(block.number - 1)
+            blockPDF = reader.getPage(block.number - 1)
             # crop the page to pecha size
             params = (
-                source.getPage(index), 0, pechaHeight,
+                reader.getPage(index), 0, pechaHeight,
                 float(opts.paperSize[1]), float(opts.paperSize[0]))
             blockPDF = cropPDFPage(*params)
             # rotate if need be
@@ -256,6 +256,6 @@ def assembleBooklet(inFilename, outFilename, opts):
             # figure out where on the page to put it
             blockPDF = placeBlock(blockPDF, block.location)
             page.mergePage(blockPDF)
-    output.write(assembled)
-    assembled.close()
+    writer.write(stream)
+    stream.close()
     blank.close()
