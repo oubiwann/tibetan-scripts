@@ -51,26 +51,33 @@ def cropPDFPage(page, startX=0, startY=pechaHeight, endX=14*inch,
                 endY=8.5*inch):
     """
     """
-    #print ((startX, startY), (endX, endY))
     # Check for landscape orientation
     if int(page.get("/Rotate")) in [90, 270]:
         page.mediaBox.upperLeft = ((startY, startX))
         page.mediaBox.lowerRight = ((endY, endX))
         page.trimBox.upperLeft = ((startY, startX))
         page.trimBox.lowerRight = ((endY, endX))
+        page.cropBox.upperLeft = ((startY, startX))
+        page.cropBox.lowerRight = ((endY, endX))
+        page.bleedBox.upperLeft = ((startY, startX))
+        page.bleedBox.lowerRight = ((endY, endX))
     # Otherwise, it's portrait
     else:
         page.mediaBox.upperLeft = ((startX, startY))
         page.mediaBox.lowerRight = ((endX, endY))
         page.trimBox.upperLeft = ((startX, startY))
         page.trimBox.lowerRight = ((endX, endY))
+        page.cropBox.upperLeft = ((startX, startY))
+        page.cropBox.lowerRight = ((endX, endY))
+        page.bleedBox.upperLeft = ((startX, startY))
+        page.bleedBox.lowerRight = ((endX, endY))
     return page
 
 
 def createMarkedPDF(filenameOrFH, opts):
     """
     """
-    # setup legths
+    # setup lengths
     length = opts.paperSize[1] / inch
     if opts.style == 'default':
         boxParamsMid = [0, 4, length, 0.5]
@@ -165,15 +172,17 @@ def _cropEvenPechaPage(source, index, opts):
     return cropPDFPage(*params)
 
 
-def cropPDFFile(inFilename, outFilename, opts=None):
+def _crop2PerPage(source, output, opts):
     """
+    Double the pages, since one page has two pecha pages on it, and we'll
+    need to crop it twice to get all the pecha pages (crop to the top to get
+    the odd pecha pages and again, crop to the bottom to get the even pecha
+    pages).
+
+    Note that this will work for PDF readers that render a page respecting the
+    media box, etc. There are some readers that don't, so you could get some
+    strange-looking, duplicate pages with those readers.
     """
-    opts.paperSize = getattr(pagesizes, opts.paperSize)
-    source, output, cropped = _prepFiles(inFilename, outFilename)
-    # Double the pages, since one page has two pecha pages on it, and we'll
-    # need to crop it twice to get all the pecha pages (crop to the top to get
-    # the odd pecha pages and again, crop to the bottom to get the even pecha
-    # pages).
     source = _doublePages(source)
     for index in xrange(source.getNumPages()):
         if index % 2 == 0:
@@ -181,6 +190,25 @@ def cropPDFFile(inFilename, outFilename, opts=None):
         else:
             page = _cropEvenPechaPage(source, index, opts)
         output.insertPage(page, index)
+    return output
+
+
+def _crop1PerPage(source, output, opts):
+    for index in xrange(source.getNumPages()):
+        page = _cropOddPechaPage(source, index, opts)
+        output.addPage(page)
+    return output
+
+
+def cropPDFFile(inFilename, outFilename, opts=None):
+    """
+    """
+    opts.paperSize = getattr(pagesizes, opts.paperSize)
+    source, output, cropped = _prepFiles(inFilename, outFilename)
+    if opts.pechaPagesPerPage == 2:
+        output = _crop2PerPage(source, output, opts)
+    elif opts.pechaPagesPerPage == 1:
+        output = _crop1PerPage(source, output, opts)
     output.write(cropped)
     cropped.close()
 
