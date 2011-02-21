@@ -46,11 +46,13 @@ def placeBlock(page, location):
     return page
 
 
-def cropPDFPage(page, startX=0, startY=pechaHeight, endX=14*inch, endY=8.5*inch):
+def cropPDFPage(page, startX=0, startY=pechaHeight, endX=14*inch,
+                endY=8.5*inch):
     """
     """
     for index, amount in enumerate([startX, startY, endX, endY]):
-        page.mediaBox[index] = NumberObject(amount)
+        page.mediaBox.upperLeft = ((startY, startX))
+        page.mediaBox.lowerRight = ((endY, endX))
     return page
 
 
@@ -123,6 +125,8 @@ def cropPDFFile(inFilename, outFilename, opts=None):
     """
     opts.paperSize = getattr(pagesizes, opts.paperSize)
     source, output, cropped = _prepFiles(inFilename, outFilename)
+    # XXX each page needs to be cropped twice -- once for the top (odd pecha
+    # pages) and once for the bottom (even pecha pages)
     for index in xrange(source.getNumPages()):
         params = (
             source.getPage(index), 0, pechaHeight,
