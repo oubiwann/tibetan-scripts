@@ -15,7 +15,7 @@ optp.add_option('-f', '--flip', dest='flip')
 optp.add_option('-n', '--pageLimit', dest='pageLimit')
 (opts, args) = optp.parse_args()
 if not args:
-    optp.error('You must pass the filename of the pdf to mark.')
+    optp.error('You must pass the filename of the pdf to crop.')
 
 # setup filenames
 inFile = args[0]

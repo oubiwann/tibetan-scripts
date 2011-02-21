@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.4
 from StringIO import StringIO
 
 from pyPdf import PdfFileWriter, PdfFileReader
@@ -11,10 +10,12 @@ from reportlab.lib.pagesizes import legal, landscape
 from pecha.base import UPSIDEDOWN, FRONT, TOP
 from pecha.layouts import booklet
 
+
 inch = 72.0
 pechaHeight = 8.5 * inch / 2
 pechaShortWidth = 11 * inch
 pechaLongWidth = 14 * inch
+
 
 def _prepFiles(inFilename, outFilename):
     """
@@ -24,10 +25,12 @@ def _prepFiles(inFilename, outFilename):
     outStream = open(outFilename, "wb")
     return (source, outPDF, outStream)
 
+
 def _invertBoxParams(params):
     """
     """
     return [params[1], params[0], params[3], params[2]]
+
 
 def placeBlock(page, location):
     """
@@ -42,12 +45,14 @@ def placeBlock(page, location):
             page.artBox[index] = NumberObject(amount)
     return page
 
+
 def cropPDFPage(page, startX=0, startY=pechaHeight, endX=14*inch, endY=8.5*inch):
     """
     """
     for index, amount in enumerate([startX, startY, endX, endY]):
         page.mediaBox[index] = NumberObject(amount)
     return page
+
 
 def createMarkedPDF(filenameOrFH, opts):
     """
@@ -62,8 +67,9 @@ def createMarkedPDF(filenameOrFH, opts):
         boxParamsTop = [0, 0, length, 0.2]
         boxParamsMid = [0, 3.85, length, 0.8]
         boxParamsBot = [0, 8.3, length, 0.2]
-    # with PDF files that have been converted from PS files via the command line
-    # tool pstopdf, we've found that we need to invert the crop box dimensions
+    # with PDF files that have been converted from PS files via the command
+    # line tool pstopdf, we've found that we need to invert the crop box
+    # dimensions
     if opts.flip:
         boxParamsMid = _invertBoxParams(boxParamsMid)
         if opts.drawTopCrop:
@@ -83,6 +89,7 @@ def createMarkedPDF(filenameOrFH, opts):
     c.save()
     return (filenameOrFH, c)
 
+
 def createBlankPDF(filenameOrFH, opts):
     """
     """
@@ -91,6 +98,7 @@ def createBlankPDF(filenameOrFH, opts):
     c.showPage()
     c.save()
     return (filenameOrFH, c)
+
 
 def addCropMarks(inFilename, outFilename, opts):
     """
@@ -109,6 +117,7 @@ def addCropMarks(inFilename, outFilename, opts):
     marked.close()
     crop.close()
 
+
 def cropPDFFile(inFilename, outFilename, opts=None):
     """
     """
@@ -123,6 +132,7 @@ def cropPDFFile(inFilename, outFilename, opts=None):
     output.write(cropped)
     cropped.close()
 
+
 def cropAndRotateFile(inFilename, outFilename, opts=None):
     """
     """
@@ -135,6 +145,7 @@ def cropAndRotateFile(inFilename, outFilename, opts=None):
         output.addPage(page)
     output.write(cropped)
     cropped.close()
+
 
 def assembleBooklet(inFilename, outFilename, opts):
     """
@@ -168,4 +179,3 @@ def assembleBooklet(inFilename, outFilename, opts):
     output.write(assembled)
     assembled.close()
     blank.close()
-
