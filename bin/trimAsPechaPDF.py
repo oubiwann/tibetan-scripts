@@ -4,6 +4,7 @@ from optparse import OptionParser
 
 from pecha.assembler import cropPDFFile
 
+
 usage = '''%prog [options] infile'''
 optp = OptionParser(usage=usage)
 optp.set_defaults(suffix='trimmed', flip=False, pageLimit=None,
@@ -21,6 +22,6 @@ if not args:
 inFile = args[0]
 origBase = os.path.splitext(inFile)[0]
 outFile = '%s_%s.pdf' % (origBase, opts.suffix)
+
 # Create the crop marked file
 cropPDFFile(inFile, outFile, opts)
-
