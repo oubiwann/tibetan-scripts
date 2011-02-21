@@ -25,3 +25,4 @@ outFile = '%s_%s.pdf' % (origBase, opts.suffix)
 
 # Create the crop marked file
 cropPDFFile(inFile, outFile, opts)
+print "\nThe PDF pecha '%s' is ready to be read.\n" % outFile
