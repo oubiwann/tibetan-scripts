@@ -42,8 +42,12 @@ def cropPDFPage(page, startX=0, startY=pechaHeight, endX=14*inch,
                 endY=8.5*inch):
     """
     """
+    contents = page.get("/Contents").getObject()
+    contents.getData()
+    print page.getAllText()
     # Check for landscape orientation
     if int(page.get("/Rotate")) in [90, 270]:
+        #import pdb;pdb.set_trace()
         page.mediaBox.upperLeft = ((startY, startX))
         page.mediaBox.lowerRight = ((endY, endX))
         page.trimBox.upperLeft = ((startY, startX))
@@ -105,10 +109,10 @@ def createBlankPDF(filenameOrFH, opts):
     """
     """
     orientation = getattr(pagesizes, opts.orientation)
-    c = Canvas(filenameOrFH, pagesize=orientation(opts.paperSize))
-    c.showPage()
-    c.save()
-    return (filenameOrFH, c)
+    canvas = Canvas(filenameOrFH, pagesize=orientation(opts.paperSize))
+    canvas.showPage()
+    canvas.save()
+    return (filenameOrFH, canvas)
 
 
 def _prepFiles(inFilename, outFilename):
