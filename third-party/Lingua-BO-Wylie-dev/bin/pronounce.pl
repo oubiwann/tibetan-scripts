@@ -4,6 +4,7 @@ use strict;
 BEGIN { 
   push @INC, '../lib' if -d '../lib';
   push @INC, './lib' if -d './lib';
+  push @INC, './third-party/Lingua-BO-Wylie-dev/lib';
 }
 
 use Lingua::BO::Phonetics;
