@@ -3,6 +3,7 @@ from optparse import OptionParser
 
 from pyPdf import PdfFileWriter, PdfFileReader
 
+
 usage = '''%prog [options] oddPagedFile evenPagedFile'''
 parser = OptionParser(usage=usage)
 (opts, args) = parser.parse_args()
