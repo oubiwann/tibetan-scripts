@@ -6,14 +6,14 @@ FIXED - We're getting repeats of blocks due to the line:
 in setupBlocks(). This needs to be changed so that only the *correct* blocks
 (i.e., the pertinent block in the sheet) gets assigned the newBlocks variable.
 
-FIXED - Pecha's with less than 4 blocks currently seem to need to do the following in
-order to produce accurate blocks:
+FIXED - Pecha's with less than 4 blocks currently seem to need to do the
+following in order to produce accurate blocks:
   p = Pecha(2)
   s = Shee(p, 1)
 That second line shouldn't be neccessary.
 
-FIXED - Pecha's with more than 8 blocks don't produce the corrent number of blocks, nor
-do the block get the right numbers.
+FIXED - Pecha's with more than 8 blocks don't produce the corrent number of
+blocks, nor do the block get the right numbers.
 
 TASKS
 -----

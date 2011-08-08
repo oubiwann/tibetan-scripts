@@ -212,8 +212,8 @@ class ImposePecha(object):
         (self.opts, args) = parser.parse_args()
         self.infile, self.outfile = args
         if not args or len(args) != 2:
-            msg = ("You must pass the filenames for the source and destination "
-                   "documents.")
+            msg = ("You must pass the filenames for the source and "
+                   "destination documents.")
             parser.error(msg)
 
     def run(self):
