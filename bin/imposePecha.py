@@ -52,6 +52,7 @@ def getScale(srcPage):
 def getScaledDestDim(srcPage):
     return [x * int(getScale(srcPage)) for x in getDestDim()]
 
+
 infile, outfile = args
 reader = PdfFileReader(file(infile, "rb"))
 writer = PdfFileWriter(

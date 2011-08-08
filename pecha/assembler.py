@@ -8,7 +8,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import pagesizes
 from reportlab.lib.pagesizes import legal, landscape
 
-from pecha.base import UPSIDEDOWN, FRONT, TOP
+from pecha import const
 from pecha.layouts import booklet
 
 
@@ -28,7 +28,7 @@ def placeBlock(page, location):
     """
     """
     # XXX this isn't working yet
-    if location == TOP:
+    if location == const.TOP:
         x1, y1, x2, y2 = (0, 0, 11 * inch, 8.5 * inch)
         page = cropPDFPage(page, x1, y1, x2, y2)
     else:
@@ -224,7 +224,7 @@ def cropAndRotateFile(inFilename, outFilename, opts=None):
     pf = booklet.pechaFactory(reader.getNumPages())
     for index, block in enumerate(pf.getBlockList()):
         page = cropPDFPage(reader.getPage(index))
-        if block.orientation == UPSIDEDOWN:
+        if block.orientation == const.UPSIDEDOWN:
             page.rotateClockwise(180)
         writer.addPage(page)
     writer.write(stream)
