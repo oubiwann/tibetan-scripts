@@ -11,27 +11,7 @@ from optparse import OptionParser
 
 from pyPdf import PdfFileWriter, PdfFileReader
 
-
-# all measurements given in portrait orientation
-LETTER = (8.5, 11)
-A2 = (8.27, 11.69)
-FANFOLD = (8.5, 12)
-FOLIO = (8.5, 13)
-LEGAL = (8.5, 14)
-A3 = (11.69, 16.54)
-TABLOID = (11, 17)
-SUPER_B = (13, 19)
-POST = (15.5, 19.5)
-CROWN = (15, 20)
-LARGE_POST = (16.5, 21)
-A2 = (16.54, 23.39)
-BROADSHEET = (18, 24)
-
-WIDTH = 0
-HEIGHT = 1
-
-PORTRAIT = 1
-LANDSCAPE = 2
+from pecha import const
 
 
 usage = "%%prog [options] source_file dest_file\n%s" %  __doc__.rstrip()
@@ -40,10 +20,10 @@ parser.add_option(
     "-c", "--count", dest="count", default=3,
     help="pecha pages per side of the printed sheet")
 parser.add_option(
-    "-s", "--sheet-size", dest="size", default=LEGAL,
+    "-s", "--sheet-size", dest="size", default=const.LEGAL,
     help="width of the printed sheet")
 parser.add_option(
-    "-o", "--orientation", dest="orientation", default=LANDSCAPE,
+    "-o", "--orientation", dest="orientation", default=const.LANDSCAPE,
     help="orientation of the printed sheet (LANDSCAPE or PORTRAIT)")
 (opts, args) = parser.parse_args()
 if not args or len(args) != 2:
@@ -58,15 +38,15 @@ def getSrcDim(srcPage):
 
 
 def getDestDim():
-    if opts.orientation == PORTRAIT:
+    if opts.orientation == const.PORTRAIT:
         return opts.size
-    elif opts.orientation == LANDSCAPE:
+    elif opts.orientation == const.LANDSCAPE:
         return (opts.size[1], opts.size[0])
 
 
 def getScale(srcPage):
     destWidth, destHeight = getDestDim()
-    return (getSrcDim(srcPage)[WIDTH]/float(destWidth))
+    return (getSrcDim(srcPage)[const.WIDTH]/float(destWidth))
 
 
 def getScaledDestDim(srcPage):
@@ -80,13 +60,13 @@ writer = PdfFileWriter(
 opts.count
 
 srcPage = reader.getPage(0)
-height = getSrcDim(srcPage)[HEIGHT]
+height = getSrcDim(srcPage)[const.HEIGHT]
 totalHeight = opts.count * height
 
 destPage = writer.addBlankPage(*getScaledDestDim(srcPage))
 
 print totalHeight
-fitScale = getScaledDestDim(srcPage)[HEIGHT] / float(totalHeight)
+fitScale = getScaledDestDim(srcPage)[const.HEIGHT] / float(totalHeight)
 print fitScale
 srcPage.scale(fitScale, fitScale)
 #scale = getScale(srcPage)

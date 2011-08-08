@@ -1,11 +1,4 @@
-RIGHTSIDEUP = 0
-UPSIDEDOWN = 1
-
-FRONT = 0
-BACK = 1
-
-TOP = 0
-BOTTOM = 1
+from pecha import const
 
 
 class Pecha(object):
@@ -119,20 +112,20 @@ class Block(object):
     location: the top of bottom of the side
     number: the pecha block number
 
-    >>> b = Block(None, RIGHTSIDEUP, FRONT)
-    >>> b.orientation == RIGHTSIDEUP
+    >>> b = Block(None, const.RIGHTSIDEUP, const.FRONT)
+    >>> b.orientation == const.RIGHTSIDEUP
     True
-    >>> b.side == FRONT
+    >>> b.side == const.FRONT
     True
 
-    >>> b = Block(None, UPSIDEDOWN, BACK)
-    >>> b.orientation == UPSIDEDOWN
+    >>> b = Block(None, const.UPSIDEDOWN, const.BACK)
+    >>> b.orientation == const.UPSIDEDOWN
     True
-    >>> b.side == BACK
+    >>> b.side == const.BACK
     True
     """
-    def __init__(self, sheet, orientation=RIGHTSIDEUP, side=FRONT,
-        location=TOP, number=1):
+    def __init__(self, sheet, orientation=const.RIGHTSIDEUP, side=const.FRONT,
+        location=const.TOP, number=1):
         self.sheet = sheet
         self.orientation = orientation
         self.side = side
@@ -143,15 +136,15 @@ class Block(object):
         return cmp(self.number, other.number)
 
     def __repr__(self):
-        if self.side == FRONT:
+        if self.side == const.FRONT:
             side = 'front'
         else:
             side = 'back'
-        if self.orientation == RIGHTSIDEUP:
+        if self.orientation == const.RIGHTSIDEUP:
             orient = 'rightside-up'
         else:
             orient = 'upside-down'
-        if self.location == TOP:
+        if self.location == const.TOP:
             loc = 'top'
         else:
             loc = 'bottom'
