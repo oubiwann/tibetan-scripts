@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Convert a lower-case transliterated file to an upper-case transliterated file.
 
@@ -24,7 +25,7 @@ def main():
         outputFilename = args[1]
     command = [
         "perl",
-        "third-party/Lingua-BO-Wylie-dev/bin/pronounce.pl", 
+        "third-party/Lingua-BO-Wylie-dev/bin/pronounce.pl",
         "-j", "' '",
         filename,
         "-",
@@ -43,7 +44,6 @@ def main():
                 badlines.append(line)
         if outputFilename and not options.debug:
             data += line + "\n"
-
         else:
             print line
         if data:

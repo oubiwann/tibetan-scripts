@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-BEGIN { 
+BEGIN {
   push @INC, '../lib' if -d '../lib';
   push @INC, './lib' if -d './lib';
   push @INC, './third-party/Lingua-BO-Wylie-dev/lib';
@@ -12,13 +12,13 @@ use Getopt::Long;
 
 my ($style, $repeat, $joiner, $separator, $autosplit, $caps, $help);
 GetOptions(
-  "style=s"	=> \$style,
-  "repeat=s"	=> \$repeat,
-  "joiner=s"	=> \$joiner,
-  "separator=s"	=> \$separator,
-  "autosplit"	=> \$autosplit,
-  "caps=s"	=> \$caps,
-  "help"	=> \$help,
+  "style=s"     => \$style,
+  "repeat=s"    => \$repeat,
+  "joiner=s"    => \$joiner,
+  "separator=s" => \$separator,
+  "autosplit"   => \$autosplit,
+  "caps=s"      => \$caps,
+  "help"        => \$help,
 );
 
 sub help {
@@ -32,11 +32,11 @@ be encoded in UTF-8.
 Options are:
   -s style-name  - which phonemic system to use; the default is THL.
                    The other available style is 'rigpa-en'.
-  -r '//'        - also reprint the tibetan before the pronounciation, 
+  -r '//'        - also reprint the tibetan before the pronounciation,
                    separated by '//' (or whatever)
-  -j '-'         - use '-' (or whatever character) to mark syllables belonging 
+  -j '-'         - use '-' (or whatever character) to mark syllables belonging
                    to a single word
-  -sep ' '       - use ' ' (or whatever) to separate syllables belonging to 
+  -sep ' '       - use ' ' (or whatever) to separate syllables belonging to
                    different words
   -a             - auto-split words based on a small built-in dictionary
   -c '*'         - use '*' (or whatever) to mark words to be capitalized
@@ -97,4 +97,3 @@ while(defined(my $in = <IN>)) {
     print OUT "$out";
   }
 }
-
