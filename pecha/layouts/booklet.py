@@ -2,6 +2,7 @@ import math
 
 from pecha.base import Pecha, Block
 
+
 class Sheet(object):
     """
     An object representing a two-sided, pysical piece of paper.
@@ -46,8 +47,6 @@ class Sheet(object):
     ...   print block
     <Block: 2 | top | sheet 1 | front | rightside-up>
     <Block: 1 | top | sheet 1 | back | upside-down>
-
-
     """
     def __init__(self, document, number, blocks=4):
         self.document = document
@@ -289,9 +288,11 @@ def pechaFactory(blockCount=0, blocksPerSheet=4):
     """
     return Pecha(Sheet, blockCount, blocksPerSheet)
 
+
 def test():
     import doctest
     doctest.testmod()
+
 
 if __name__ == '__main__':
     test()

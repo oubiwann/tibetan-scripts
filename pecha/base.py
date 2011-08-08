@@ -7,6 +7,7 @@ BACK = 1
 TOP = 0
 BOTTOM = 1
 
+
 class Pecha(object):
     """
     A object representing a complete pecha document.
@@ -37,9 +38,7 @@ class Pecha(object):
     (12, 3)
     (13, 4)
     (14, 4)
-
     """
-
     def __init__(self, klass, blockCount=0, blocksPerSheet=4):
         self.LayoutClass = klass
         self.blocksPerSheet = blocksPerSheet
@@ -106,6 +105,7 @@ class Pecha(object):
             for block in sheet.blocks:
                 if block.number == blockNumber:
                     return sheet
+
 
 class Block(object):
     """
@@ -180,10 +180,11 @@ class Block(object):
         return self._loc
     location = property(getLocation, setLocation)
 
+
 def test():
     import doctest
     doctest.testmod()
 
+
 if __name__ == '__main__':
     test()
-

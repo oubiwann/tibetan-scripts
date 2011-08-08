@@ -18,11 +18,14 @@ from pyparsing import alphas, nums, printables, alphanums
 from pyparsing import restOfLine, oneOf, OneOrMore, ZeroOrMore
 from pyparsing import ParseException
 
+
 class RTFError(Exception):
     pass
 
+
 class RTFParseError(RTFError):
    "Unable to parse RTF data."
+
 
 class RTFGrammar(object):
     """
@@ -182,7 +185,6 @@ class RTFGrammar(object):
     # paragraph text
     
     # character text
-    
 
     # assemble the grammar
     rtfDoc = (leftBracket + rtfVersion + charSet + codePage +
@@ -194,6 +196,7 @@ class RTFGrammar(object):
 
     def getGrammar(self):
         return self.rtfDoc
+
 
 class RTFParser(object):
 
@@ -231,9 +234,9 @@ class RTFParser(object):
         """
         self.tokens = self.grammar.parseString(rtfData)
 
+
 class RTFFile(object):
     """
-
     """
     def __init__(self, filename):
         self.filename = filename
@@ -270,13 +273,13 @@ class RTFFile(object):
 
     def buildFontTable(self):
         """
-
         """
+
 
 def _test():
     import doctest
     doctest.testmod()
 
+
 if __name__ == '__main__':
     _test()
-
