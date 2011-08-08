@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 """
-%prog [options] infile
+[add description]
+
+Usage:
+    %prog [options] infile
 """
 from pecha import scripts
 

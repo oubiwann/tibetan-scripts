@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 """
-%prog [options] infile
+Add crop marks to a PDF file.
+
+Usage:
+    %prog [options] infile
 """
 from pecha import scripts
 

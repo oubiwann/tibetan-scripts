@@ -1,10 +1,11 @@
 import os.path
-from parserarse import OptionParser
+from optparse import OptionParser
 from subprocess import Popen, PIPE
 import sys
 
 from pyPdf import PdfFileWriter, PdfFileReader
 
+from pecha import const
 from pecha.assembler import addCropMarks, assembleBooklet, cropPDFFile
 
 
@@ -192,3 +193,77 @@ class UpperTransliteration(object):
     def run(self):
         results = self.runPerl()
         self.parseResults(results)
+
+
+class ImposePecha(object):
+    """
+    """
+    def __init__(self, usage):
+        parser = OptionParser(usage=usage)
+        parser.add_option(
+            "-c", "--count", dest="count", default=3,
+            help="pecha pages per side of the printed sheet")
+        parser.add_option(
+            "-s", "--sheet-size", dest="size", default=const.LEGAL,
+            help="width of the printed sheet")
+        parser.add_option(
+            "-o", "--orientation", dest="orientation", default=const.LANDSCAPE,
+            help="orientation of the printed sheet (LANDSCAPE or PORTRAIT)")
+        (self.opts, args) = parser.parse_args()
+        self.infile, self.outfile = args
+        if not args or len(args) != 2:
+            msg = ("You must pass the filenames for the source and destination "
+                   "documents.")
+            parser.error(msg)
+
+    def run(self):
+        def getSrcDim(srcPage):
+            return (float(srcPage.mediaBox.getWidth()),
+                    float(srcPage.mediaBox.getHeight()))
+
+        def getDestDim():
+            if self.opts.orientation == const.PORTRAIT:
+                return self.opts.size
+            elif self.opts.orientation == const.LANDSCAPE:
+                return (self.opts.size[1], self.opts.size[0])
+
+        def getScale(srcPage):
+            destWidth, destHeight = getDestDim()
+            return (getSrcDim(srcPage)[const.WIDTH]/float(destWidth))
+
+
+        def getScaledDestDim(srcPage):
+            return [x * int(getScale(srcPage)) for x in getDestDim()]
+
+
+        reader = PdfFileReader(file(self.infile, "rb"))
+        writer = PdfFileWriter(
+            documentInfo=reader.getDocumentInfo(), authors=["Vimala"])
+
+        #self.opts.count
+
+        srcPage = reader.getPage(0)
+        height = getSrcDim(srcPage)[const.HEIGHT]
+        totalHeight = self.opts.count * height
+
+        destPage = writer.addBlankPage(*getScaledDestDim(srcPage))
+
+        print totalHeight
+        fitScale = getScaledDestDim(srcPage)[const.HEIGHT] / float(totalHeight)
+        print fitScale
+        srcPage.scale(fitScale, fitScale)
+        #scale = getScale(srcPage)
+        #srcPage.scale(scale, scale)
+
+        destPage.mergeTranslatedPage(srcPage, 0, height * 2 - .2 * height)
+
+        srcPage = reader.getPage(1)
+        srcPage.scale(fitScale, fitScale)
+        destPage.mergeTranslatedPage(srcPage, 0, height - .1 * height)
+
+        srcPage = reader.getPage(3)
+        srcPage.scale(fitScale, fitScale)
+        destPage.mergeTranslatedPage(srcPage, 0, 0)
+
+        #import pdb;pdb.set_trace()
+        writer.write(open(self.outfile, "wb"))

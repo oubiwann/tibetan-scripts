@@ -3,7 +3,7 @@
 Convert a lower-case transliterated file to an upper-case transliterated file.
 
 Usage:
-    python %prog <unicode input file> [<output file>]
+    %prog <unicode input file> [<output file>]
 
 where the unicode file contains lower-case Tibetan transliteration text.
 """
