@@ -167,7 +167,7 @@ class UpperTransliteration(object):
     def parseResults(self, results):
         badlines = []
         data = ""
-        for lineNumber, line in enumerate(reults):
+        for lineNumber, line in enumerate(results):
             lineNumber += 1
             if len(line) > 0:
                 line = "%s /  " % line
