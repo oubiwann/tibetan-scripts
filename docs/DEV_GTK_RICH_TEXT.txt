@@ -1,4 +1,0 @@
-How to handle text-insertion:
-    http://www.mail-archive.com/pygtk@daa.com.au/msg17593.html
-
-
